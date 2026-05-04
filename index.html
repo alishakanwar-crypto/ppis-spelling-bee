@@ -1,50 +1,65 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>PPIS Academic Coordinator</title>
     <style>
       body { font-family: Arial, sans-serif; padding: 24px; max-width: 720px; margin: 0 auto; }
-      button { padding: 12px 16px; margin-right: 8px; }
+      button { padding: 12px 16px; margin-right: 8px; cursor: pointer; }
       #status { margin-top: 12px; font-weight: 600; }
     </style>
   </head>
+
   <body>
     <h1>PPIS Academic Coordinator</h1>
-    <p>Tap Start, allow microphone access, then speak.</p>
-<button id="start">Start</button>
-<button id="stop">Stop</button>
-<div id="status">Status: idle</div>
+    <p>Click Start, allow microphone, then speak.</p>
+
+    <button id="start" type="button">Start</button>
+    <button id="stop" type="button">Stop</button>
+
     <div id="status">Status: idle</div>
 
+    <!-- Load Vapi Web SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/vapi.js"></script>
+
+    <!-- Your app logic (MUST be after the buttons above) -->
     <script>
-      const VAPI_PUBLIC_KEY = "74dbc2c2-b021-4ddf-a257-7005d5b2eda7";
+      const VAPI_PUBLIC_KEY = "PASTE_YOUR_PUBLIC_KEY_HERE";
       const ASSISTANT_ID = "b86a3d49-85cf-49db-b14f-3afe627c494c";
 
       const statusEl = document.getElementById("status");
+      const startBtn = document.getElementById("start");
+      const stopBtn = document.getElementById("stop");
+
+      // Safety: if elements not found, show error
+      if (!startBtn || !stopBtn || !statusEl) {
+        console.error("Missing DOM elements: start/stop/status");
+      }
+
       const vapi = new Vapi(VAPI_PUBLIC_KEY);
 
-      document.getElementById("start").onclick = async () => {
+      startBtn.addEventListener("click", async () => {
         statusEl.textContent = "Status: connecting...";
         try {
           await vapi.start(ASSISTANT_ID);
-        } catch (e) {
-          console.error(e);
-          statusEl.textContent = "Status: error (check console)";
+        } catch (err) {
+          console.error(err);
+          statusEl.textContent = "Status: error (open console)";
         }
-      };
+      });
 
-      document.getElementById("stop").onclick = () => vapi.stop();
+      stopBtn.addEventListener("click", () => {
+        vapi.stop();
+        statusEl.textContent = "Status: stopped";
+      });
 
-      vapi.on("call-start", () => statusEl.textContent = "Status: in call");
-      vapi.on("call-end", () => statusEl.textContent = "Status: ended");
+      vapi.on("call-start", () => (statusEl.textContent = "Status: in call"));
+      vapi.on("call-end", () => (statusEl.textContent = "Status: ended"));
       vapi.on("error", (e) => {
         console.error(e);
-        statusEl.textContent = "Status: error (check console)";
+        statusEl.textContent = "Status: error (open console)";
       });
     </script>
   </body>
 </html>
-document.getElementById("start").onclick = () => alert("Start clicked");
