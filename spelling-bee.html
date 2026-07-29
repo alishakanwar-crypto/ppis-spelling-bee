@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spelling Bee — Preliminary Round</title>
+<meta name="description" content="PP International School — Spelling Bee Preliminary Round. Enter your details and begin.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PP International School">
+<meta property="og:title" content="Spelling Bee — Preliminary Round">
+<meta property="og:description" content="PP International School — tap to open the Spelling Bee preliminary round.">
+<meta name="theme-color" content="#E39B2C">
+<style>
+  :root{--ink:#16233A;--soft:#4A5871;--paper:#F6F7FA;--card:#FFF;--rule:#D9DFE9;
+        --honey:#E39B2C;--deep:#B87814;--wash:#FDF3E0;--good:#1E7A4B;--bad:#C0392B;--badwash:#FDECEA}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:"Segoe UI",Roboto,-apple-system,Helvetica,Arial,sans-serif;background:var(--paper);
+       color:var(--ink);display:flex;align-items:center;justify-content:center;padding:24px;line-height:1.5}
+  .stage{width:100%;max-width:780px}
+  .stage.wide{max-width:1040px}
+  .card{background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:40px;
+        box-shadow:0 1px 3px rgba(22,35,58,.06)}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--deep);
+           font-weight:700;margin-bottom:10px}
+  h1{font-family:Georgia,serif;font-size:33px;font-weight:400;line-height:1.14;margin-bottom:8px}
+  h2{font-family:Georgia,serif;font-size:20px;font-weight:400;margin:26px 0 2px}
+  .sub{color:var(--soft);font-size:15px;margin-bottom:26px}
+  label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--soft)}
+  .field{margin-bottom:18px}
+  .row{display:flex;gap:16px;flex-wrap:wrap}
+  .row .field{flex:1;min-width:140px}
+  input,select{width:100%;padding:12px 14px;font-size:16px;font-family:inherit;border:1px solid var(--rule);
+               border-radius:4px;background:#fff;color:var(--ink)}
+  input:focus,select:focus{outline:2px solid var(--honey);outline-offset:1px;border-color:var(--honey)}
+  button{font-family:inherit;cursor:pointer;border:none}
+  .btn{background:var(--ink);color:#fff;padding:14px 30px;font-size:16px;font-weight:600;border-radius:4px}
+  .btn:hover{background:#0D1727}
+  .btn:disabled{background:#B4BDCC;cursor:not-allowed}
+  .btn-ghost{background:transparent;color:var(--soft);border:1px solid var(--rule);padding:11px 22px;
+             font-size:14px;border-radius:4px;font-weight:600}
+  .btn-ghost:hover{border-color:var(--soft);color:var(--ink)}
+  .note{font-size:13px;color:var(--soft);margin-top:20px;padding-top:18px;border-top:1px solid var(--rule)}
+  .comb{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:20px}
+  .cell{width:15px;height:17px;background:#E7EBF2;
+        clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);transition:background .2s}
+  .cell.done{background:var(--honey)} .cell.now{background:var(--ink)}
+  .qbar{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;
+        color:var(--soft);margin-bottom:6px}
+  .clock{font-variant-numeric:tabular-nums;font-weight:700;font-size:15px}
+  .clock.low{color:var(--bad)}
+  .qnum{font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12px}
+  .prompt{font-size:17px;color:var(--soft);margin:16px 0 6px}
+  .sentence{font-family:Georgia,serif;font-size:22px;line-height:1.5;margin-bottom:20px}
+  .opts{display:grid;gap:10px}
+  .opt{text-align:left;background:#fff;border:1.5px solid var(--rule);border-radius:5px;padding:16px 20px;
+       font-size:22px;font-family:Georgia,serif;color:var(--ink);display:flex;align-items:center;gap:14px;width:100%}
+  .opt:hover{border-color:var(--honey);background:var(--wash)}
+  .opt.sel{border-color:var(--deep);background:var(--wash);box-shadow:inset 0 0 0 1px var(--deep)}
+  .tag{flex:0 0 26px;height:26px;border-radius:3px;background:#EEF1F6;color:var(--soft);
+       font-family:"Segoe UI",sans-serif;font-size:13px;font-weight:700;display:flex;
+       align-items:center;justify-content:center}
+  .opt.sel .tag{background:var(--deep);color:#fff}
+  .foot{display:flex;justify-content:space-between;align-items:center;margin-top:24px;
+        padding-top:20px;border-top:1px solid var(--rule)}
+  .warn{font-size:13px;color:var(--soft)}
+  .alarm{border-radius:5px;padding:11px 16px;margin-bottom:16px;font-size:15px;font-weight:600}
+  .alarm.soft{background:var(--wash);border:1px solid #EBD4A8;color:var(--deep)}
+  .alarm.hard{background:var(--badwash);border:1px solid #F1C3BC;color:var(--bad)}
+  .tick{font-family:Georgia,serif;font-size:60px;line-height:1;color:var(--good);margin-bottom:4px}
+  .tick.fail{color:var(--bad)}
+  .recorded{background:var(--wash);border:1px solid #EBD4A8;border-radius:5px;padding:18px 22px;
+            margin:18px 0;font-size:16px}
+  .flagline{font-size:13px;color:var(--bad);font-weight:600;margin-top:6px}
+  .teach{position:fixed;bottom:12px;right:16px;font-size:12px;color:#B4BDCC;background:none;padding:4px 8px}
+  .teach:hover{color:var(--soft)}
+  .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(22,35,58,.45);display:flex;
+         align-items:center;justify-content:center;padding:24px;z-index:50}
+  .modal-card{background:#fff;border-radius:6px;padding:28px;width:100%;max-width:400px;
+              box-shadow:0 10px 40px rgba(22,35,58,.28)}
+  .err{color:var(--bad);font-size:13px;min-height:18px;margin-top:8px}
+  .modal-card.wide{max-width:660px}
+  .modal-card textarea{width:100%;height:230px;font-family:Consolas,"Courier New",monospace;
+        font-size:12px;line-height:1.45;padding:12px;border:1px solid var(--rule);border-radius:4px;
+        resize:vertical;white-space:pre;color:var(--ink);background:#FBFCFE}
+  .okmsg{color:var(--good);font-size:13px;min-height:18px;margin-top:8px;font-weight:600}
+  .step{background:var(--wash);border:1px solid #EBD4A8;border-radius:5px;padding:12px 16px;
+        font-size:13.5px;margin-bottom:12px;color:var(--ink)}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:2px}
+  .tab{background:#EDF0F5;color:var(--soft);border-radius:4px 4px 0 0;padding:9px 16px;
+       font-size:14px;font-weight:700}
+  .tab:hover{background:#E2E7EF;color:var(--ink)}
+  .tab.on{background:var(--ink);color:#fff}
+  .tab.short{background:var(--wash);color:var(--deep)}
+  .tab.short.on{background:var(--deep);color:#fff}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+  th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);
+     padding:8px;border-bottom:2px solid var(--rule)}
+  td{padding:8px;border-bottom:1px solid #EDF0F5}
+  tr.in{background:var(--wash)} tr.in td:first-child{font-weight:700;color:var(--deep)}
+  tr.flag{background:var(--badwash)}
+  .num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  .pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+        padding:2px 7px;border-radius:3px;background:#FADBD6;color:var(--bad)}
+  .stats{display:flex;gap:26px;flex-wrap:wrap;margin-bottom:4px;font-size:13px;color:var(--soft)}
+  .stats b{display:block;font-size:26px;color:var(--ink);font-family:Georgia,serif;font-weight:400}
+  .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px;
+       padding-top:18px;border-top:1px solid var(--rule)}
+  .hint{background:#F2F5FA;border-left:3px solid var(--ink);padding:12px 16px;font-size:13px;
+        margin-top:14px;color:var(--soft)}
+  .prog{height:4px;background:#E7EBF2;border-radius:2px;overflow:hidden;margin-top:14px}
+  .prog i{display:block;height:100%;background:var(--honey);width:0;transition:width .2s}
+  @media (max-width:560px){.card{padding:26px 22px}h1{font-size:26px}.opt{font-size:19px}}
+  @media print{body{background:#fff;display:block;padding:0}.card{border:none;box-shadow:none}.noprint{display:none}}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+
+  <!-- 0 · SETUP -->
+  <div class="card" id="setup">
+    <div class="eyebrow">Set up this computer</div>
+    <h1>Spelling Bee — Prelim</h1>
+    <p class="sub">Every result goes into one shared school record, whichever computer it came from.
+       There are no files to collect and nothing to merge afterwards.</p>
+    <div class="row">
+      <div class="field">
+        <label for="session">Event code — must be identical on every computer</label>
+        <input id="session" type="text" autocomplete="off" value="BEE2026" spellcheck="false">
+      </div>
+      <div class="field">
+        <label for="pin">Teacher PIN</label>
+        <input id="pin" type="text" autocomplete="off" value="2026">
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="station">Computer number (for your reference)</label>
+        <input id="station" type="text" autocomplete="off" placeholder="PC-07">
+      </div>
+      <div class="field">
+        <label for="extra">Extra minutes (0 for normal)</label>
+        <input id="extra" type="number" min="0" max="20" value="0">
+      </div>
+    </div>
+    <div id="netline" class="warn" style="margin-bottom:16px"></div>
+    <button class="btn" id="begin">Open for students</button>
+    <p class="note"><strong>The event code is the important field.</strong> Every computer must use
+      exactly the same code, or the results will land in separate records. The PIN is stored with the event the
+      first time it is created — other computers joining the same code cannot change it, so
+      choosing a different PIN elsewhere gives nobody access to the results.</p>
+  </div>
+
+  <!-- 1 · ENTRY -->
+  <div class="card" id="entry" style="display:none">
+    <div class="eyebrow">Preliminary Round</div>
+    <h1>School Spelling Bee</h1>
+    <p class="sub">Type your details, then start.</p>
+    <p class="warn" id="joinline" style="margin:-14px 0 20px"></p>
+    <div class="field">
+      <label for="nm">Full name (as in the school register)</label>
+      <input id="nm" type="text" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="row">
+      <div class="field"><label for="cl">Class</label>
+        <select id="cl"><option value="">Select</option>
+          <option>3</option><option>4</option><option>5</option>
+          <option>6</option><option>7</option><option>8</option></select></div>
+      <div class="field"><label for="sec">Section</label>
+        <input id="sec" type="text" autocomplete="off" spellcheck="false" placeholder="A"></div>
+      <div class="field"><label for="rl">Roll number</label>
+        <input id="rl" type="text" autocomplete="off" spellcheck="false" placeholder="14"></div>
+    </div>
+    <div id="bandline" class="warn" style="margin-bottom:18px"></div>
+    <button class="btn" id="go" disabled>Start the test</button>
+    <p class="err" id="entryErr"></p>
+    <p class="note"><strong>Rules.</strong> Once you start, the timer runs and you cannot go back to a
+      question. Answer every question — there is no penalty for a wrong answer. Do not open any other
+      window. If the time runs out, everything you have already answered still counts.</p>
+  </div>
+
+  <!-- 2 · QUIZ -->
+  <div class="card" id="quiz" style="display:none">
+    <div class="alarm" id="alarm" style="display:none"></div>
+    <div class="comb" id="comb"></div>
+    <div class="qbar"><span class="qnum" id="qnum"></span><span class="clock" id="clock"></span></div>
+    <div id="qbody"></div>
+    <div class="foot">
+      <span class="warn" id="hint">Choose one answer</span>
+      <button class="btn" id="next" disabled>Next</button>
+    </div>
+  </div>
+
+  <!-- 3 · SAVED -->
+  <div class="card" id="done" style="display:none">
+    <div class="tick" id="tick">&#10003;</div>
+    <div class="eyebrow" id="doneEyebrow">Saved</div>
+    <h1 style="font-size:26px" id="doneTitle">Your paper is in the school record.</h1>
+    <div class="recorded" id="recap"></div>
+    <p style="font-size:16px" id="doneNote">Please leave your seat quietly. Do not tell anyone
+       which words came up.</p>
+    <div class="foot noprint">
+      <span class="warn" id="saveState"></span>
+      <button class="btn" id="again">Start next student</button>
+    </div>
+  </div>
+
+  <!-- 4 · TEACHER -->
+  <div class="card" id="sheet" style="display:none">
+    <div class="eyebrow noprint">Whole-school record</div>
+    <h1 style="font-size:26px" id="sheetTitle">Results</h1>
+    <p class="sub" id="scope" style="margin-bottom:6px"></p>
+    <div class="stats" id="stats"></div>
+    <div class="prog noprint" id="prog" style="display:none"><i></i></div>
+    <div id="alerts"></div>
+    <div class="tabs noprint" id="tabs" style="margin-top:18px"></div>
+    <div id="view"></div>
+    <div class="bar noprint">
+      <button class="btn-ghost" id="back">Back to students</button>
+      <button class="btn-ghost" id="reload">Refresh</button>
+      <span style="flex:1"></span>
+      <label class="warn" style="font-weight:600">Shortlist per band</label>
+      <input id="topn" type="number" value="14" min="2" max="40" style="width:62px;padding:8px">
+      <button class="btn-ghost" id="printBtn">Print</button>
+      <button class="btn-ghost" id="copyOne">Copy this sheet</button>
+      <button class="btn-ghost" id="xlsxOne">Download this class only</button>
+      <button class="btn" id="xlsxBtn">Download all classes</button>
+    </div>
+    <p class="warn" id="copymsg" style="margin-top:8px"></p>
+    <div class="hint noprint">Copied as <b>tab-separated</b> text — paste into Excel at cell A1 and
+      every value lands in its own column.</div>
+  </div>
+
+</div>
+<button class="teach noprint" id="teachBtn" style="display:none">Teacher</button>
+
+<div class="modal noprint" id="expBox" style="display:none">
+  <div class="modal-card wide">
+    <h2 style="margin-top:0" id="expTitle">Copy into Excel</h2>
+    <div class="step"><b>1.</b> Click inside the box &nbsp;<b>2.</b> Press <b>Ctrl + A</b> then
+      <b>Ctrl + C</b> &nbsp;<b>3.</b> Open Excel and press <b>Ctrl + V</b> in cell A1</div>
+    <textarea id="expText" spellcheck="false"></textarea>
+    <p class="okmsg" id="expMsg"></p>
+    <div style="display:flex;gap:10px;margin-top:8px;justify-content:space-between;flex-wrap:wrap">
+      <button class="btn-ghost" id="expClose">Close</button>
+      <button class="btn" id="expCopy" style="padding:11px 24px;font-size:15px">Try automatic copy</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal noprint" id="pinBox" style="display:none">
+  <div class="modal-card">
+    <h2 style="margin-top:0">Teacher access</h2>
+    <p class="warn">Enter the PIN set when this computer was opened.</p>
+    <input id="pinIn" type="password" autocomplete="off" style="margin-top:14px">
+    <p class="err" id="pinMsg"></p>
+    <div style="display:flex;gap:10px;margin-top:10px;justify-content:flex-end">
+      <button class="btn-ghost" id="pinCancel">Cancel</button>
+      <button class="btn" id="pinOk" style="padding:11px 24px;font-size:15px">Open</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
+        onerror="window.__noXLSX=true"></script>
+<script>
+const BANK = {
+  subjunior: {
+    label:"Classes 3 to 5", mins:17, take:[0, 4, 8, 8],
+    q:[
+      {t:"mcq",d:1,w:["address", "adress", "addres", "adres"]},
+      {t:"mcq",d:1,w:["different", "diffrent", "diferent", "differant"]},
+      {t:"mcq",d:1,w:["exercise", "excercise", "exercize", "exersise"]},
+      {t:"mcq",d:1,w:["library", "libary", "librery", "libraray"]},
+      {t:"mcq",d:1,w:["medicine", "medecine", "medicin", "medisine"]},
+      {t:"mcq",d:1,w:["opposite", "opposit", "oposite", "oppisite"]},
+      {t:"mcq",d:1,w:["tomorrow", "tommorow", "tomorow", "tommorrow"]},
+      {t:"mcq",d:1,w:["vegetable", "vegtable", "vegetible", "vegatable"]},
+      {t:"mcq",d:1,w:["chocolate", "choclate", "chocolat", "chocholate"]},
+      {t:"mcq",d:1,w:["grammar", "grammer", "gramar", "grammor"]},
+      {t:"mcq",d:1,w:["island", "iland", "islend", "isaland"]},
+      {t:"mcq",d:1,w:["language", "languege", "langauge", "languag"]},
+      {t:"mcq",d:1,w:["opinion", "opinon", "oppinion", "opinian"]},
+      {t:"mcq",d:1,w:["calendar", "calender", "calandar", "calindar"]},
+      {t:"mcq",d:1,w:["dictionary", "dictionery", "dictonary", "dictionry"]},
+      {t:"mcq",d:1,w:["temperature", "temprature", "temperture", "tempreture"]},
+      {t:"mcq",d:1,w:["restaurant", "restarant", "resturant", "restaurent"]},
+      {t:"mcq",d:1,w:["beginning", "begining", "beggining", "beginnning"]},
+      {t:"mcq",d:1,w:["environment", "enviroment", "envirnment", "environmant"]},
+      {t:"mcq",d:1,w:["knowledge", "knowlege", "knowladge", "knowledje"]},
+      {t:"mcq",d:1,w:["straight", "straigt", "straiht", "strieght"]},
+      {t:"mcq",d:1,w:["naughty", "naugty", "nauhgty", "naughtty"]},
+      {t:"mcq",d:2,w:["disappear", "dissapear", "disapear", "dissappear"]},
+      {t:"mcq",d:2,w:["embarrass", "embarass", "embarras", "embbarrass"]},
+      {t:"mcq",d:2,w:["occasion", "ocassion", "occassion", "ocasion"]},
+      {t:"mcq",d:2,w:["committee", "commitee", "comittee", "committe"]},
+      {t:"mcq",d:2,w:["surprise", "suprise", "surprize", "surpprise"]},
+      {t:"mcq",d:2,w:["possession", "posession", "possesion", "posesion"]},
+      {t:"mcq",d:2,w:["guarantee", "gaurantee", "garantee", "guarentee"]},
+      {t:"mcq",d:2,w:["immediately", "imediately", "immediatly", "immeadiately"]},
+      {t:"mcq",d:2,w:["interesting", "intresting", "interseting", "intrestting"]},
+      {t:"mcq",d:2,w:["especially", "espesially", "especialy", "expecially"]},
+      {t:"mcq",d:2,w:["experience", "experiance", "expirience", "experence"]},
+      {t:"mcq",d:2,w:["familiar", "familar", "familier", "famaliar"]},
+      {t:"mcq",d:2,w:["foreign", "foriegn", "forign", "foreighn"]},
+      {t:"mcq",d:2,w:["generally", "generaly", "genrally", "generallly"]},
+      {t:"mcq",d:2,w:["happened", "happend", "hapened", "happenned"]},
+      {t:"mcq",d:2,w:["height", "heigth", "hieght", "heightt"]},
+      {t:"mcq",d:2,w:["jealous", "jelous", "jealus", "jeallous"]},
+      {t:"mcq",d:2,w:["laughter", "laughtar", "laufter", "laughtter"]},
+      {t:"mcq",d:2,w:["machine", "machin", "mashine", "machene"]},
+      {t:"mcq",d:2,w:["ordinary", "ordinery", "ordnary", "ordinarry"]},
+      {t:"mcq",d:2,w:["patient", "pateint", "patiant", "pashent"]},
+      {t:"mcq",d:2,w:["pleasant", "plesant", "pleasent", "pleassant"]},
+      {t:"mcq",d:2,w:["purpose", "porpose", "purpuse", "purposse"]},
+      {t:"mcq",d:2,w:["receive", "recieve", "receeve", "receve"]},
+      {t:"mcq",d:2,w:["rhyme", "rhime", "ryme", "rhymme"]},
+      {t:"mcq",d:2,w:["scissors", "sissors", "scisors", "scissers"]},
+      {t:"mcq",d:2,w:["secretary", "secratary", "secretery", "secertary"]},
+      {t:"mcq",d:2,w:["soldier", "soldeir", "soldior", "soulder"]},
+      {t:"mcq",d:2,w:["stomach", "stomache", "stomac", "stomack"]},
+      {t:"mcq",d:2,w:["success", "succes", "sucess", "successs"]},
+      {t:"mcq",d:2,w:["thorough", "thourough", "thorogh", "throrough"]},
+      {t:"mcq",d:2,w:["through", "thruogh", "throught", "thorugh"]},
+      {t:"mcq",d:2,w:["until", "untill", "untl", "unntil"]},
+      {t:"mcq",d:2,w:["usually", "usualy", "usally", "usaully"]},
+      {t:"mcq",d:2,w:["writing", "writting", "writeing", "wrighting"]},
+      {t:"err",d:2,s:"We visited the musuem near our school.",o:["visited", "musuem", "near", "school"],a:"musuem"},
+      {t:"err",d:2,s:"She recieved a letter from her cousin.",o:["recieved", "letter", "from", "cousin"],a:"recieved"},
+      {t:"err",d:2,s:"The goverment built a new bridge.",o:["goverment", "built", "bridge", "new"],a:"goverment"},
+      {t:"err",d:2,s:"It was a beatiful morning in December.",o:["beatiful", "morning", "December", "was"],a:"beatiful"},
+      {t:"err",d:2,s:"He was absant from school yesterday.",o:["absant", "school", "yesterday", "from"],a:"absant"},
+      {t:"err",d:2,s:"They live in a diffrent city now.",o:["diffrent", "live", "city", "now"],a:"diffrent"},
+      {t:"err",d:2,s:"The teacher gave us a diffcult sum.",o:["teacher", "diffcult", "sum", "gave"],a:"diffcult"},
+      {t:"mcq",d:3,w:["ancient", "anceint", "anciant", "antient"]},
+      {t:"mcq",d:3,w:["appreciate", "apreciate", "appriciate", "appreceate"]},
+      {t:"mcq",d:3,w:["ceiling", "cieling", "celing", "ceilling"]},
+      {t:"mcq",d:3,w:["certificate", "certificat", "sertificate", "certifficate"]},
+      {t:"mcq",d:3,w:["convenience", "convience", "conveniance", "convenence"]},
+      {t:"mcq",d:3,w:["courageous", "couragous", "curageous", "couragious"]},
+      {t:"mcq",d:3,w:["definitely", "definately", "definitly", "defenitely"]},
+      {t:"mcq",d:3,w:["desperate", "desparate", "despirate", "desperete"]},
+      {t:"mcq",d:3,w:["disappoint", "dissapoint", "disapoint", "dissappoint"]},
+      {t:"mcq",d:3,w:["exaggerate", "exagerate", "exaggarate", "exeggerate"]},
+      {t:"mcq",d:3,w:["excellent", "excelent", "exellent", "excellant"]},
+      {t:"mcq",d:3,w:["February", "Febuary", "Febraury", "Februrary"]},
+      {t:"mcq",d:3,w:["fortunately", "fortunatly", "fortuneately", "fortunatley"]},
+      {t:"mcq",d:3,w:["government", "goverment", "governmant", "govenment"]},
+      {t:"mcq",d:3,w:["independent", "independant", "indipendent", "independend"]},
+      {t:"mcq",d:3,w:["literature", "litrature", "literatur", "litterature"]},
+      {t:"mcq",d:3,w:["mischievous", "mischievious", "mischevous", "mischeivous"]},
+      {t:"mcq",d:3,w:["necessary", "neccessary", "necesary", "necessery"]},
+      {t:"mcq",d:3,w:["occurred", "occured", "ocurred", "occurrred"]},
+      {t:"mcq",d:3,w:["parallel", "parralel", "paralell", "parrallel"]},
+      {t:"mcq",d:3,w:["persuade", "pursuade", "perswade", "persaude"]},
+      {t:"mcq",d:3,w:["privilege", "priviledge", "privelege", "privilage"]},
+      {t:"mcq",d:3,w:["pronunciation", "pronounciation", "pronuciation", "pronunciaton"]},
+      {t:"mcq",d:3,w:["rhythm", "rythm", "rhythem", "rhytm"]},
+      {t:"mcq",d:3,w:["separate", "seperate", "saparate", "separete"]},
+      {t:"mcq",d:3,w:["sincerely", "sincerly", "sincerley", "sinserely"]},
+      {t:"mcq",d:3,w:["vehicle", "vehical", "vehicel", "vehicule"]},
+      {t:"cloze",d:3,s:"The strong wind ____ the door open.",o:["blew", "blue", "bleu", "blewe"],a:"blew"},
+      {t:"cloze",d:3,s:"She tore off a ____ of paper.",o:["piece", "peace", "peice", "pease"],a:"piece"},
+      {t:"cloze",d:3,s:"I could not ____ what she said.",o:["hear", "here", "heer", "hier"],a:"hear"},
+      {t:"cloze",d:3,s:"The children forgot ____ books at home.",o:["their", "there", "they're", "thier"],a:"their"},
+      {t:"cloze",d:3,s:"Please be ____ in the library.",o:["quiet", "quite", "quaint", "quitte"],a:"quiet"},
+      {t:"cloze",d:3,s:"We did not know ____ to go or stay.",o:["whether", "weather", "wether", "whither"],a:"whether"},
+      {t:"cloze",d:3,s:"He pressed the ____ to stop the car.",o:["brake", "break", "brakke", "braek"],a:"brake"},
+      {t:"cloze",d:3,s:"He was ____ tired to finish the race.",o:["too", "to", "two", "tou"],a:"too"},
+      {t:"mcq",d:4,w:["yacht", "yatch", "yaght", "yachtt"]},
+      {t:"mcq",d:4,w:["queue", "quee", "queu", "quewe"]},
+      {t:"mcq",d:4,w:["muscle", "mussle", "musle", "muscel"]},
+      {t:"mcq",d:4,w:["tongue", "tounge", "tongu", "tungue"]},
+      {t:"mcq",d:4,w:["doubt", "doubte", "dowt", "doubbt"]},
+      {t:"mcq",d:4,w:["eighth", "eigth", "eightth", "eighteh"]},
+      {t:"mcq",d:4,w:["forty", "fourty", "forety", "fortty"]},
+      {t:"mcq",d:4,w:["leisure", "liesure", "leizure", "lesure"]},
+      {t:"mcq",d:4,w:["knight", "knite", "knigt", "knightt"]},
+      {t:"mcq",d:4,w:["wrestle", "wrestel", "wressle", "wrestell"]},
+      {t:"mcq",d:4,w:["plumber", "plumer", "plummer", "plumbar"]},
+      {t:"mcq",d:4,w:["autumn", "autum", "autumm", "autmn"]},
+      {t:"mcq",d:4,w:["column", "colum", "collumn", "columm"]},
+      {t:"mcq",d:4,w:["solemn", "solem", "solemm", "sollemn"]},
+      {t:"mcq",d:4,w:["receipt", "reciept", "receit", "receipte"]},
+      {t:"mcq",d:4,w:["subtle", "subtel", "suttle", "subttle"]},
+      {t:"mcq",d:4,w:["debt", "dett", "debtt", "debbt"]},
+      {t:"mcq",d:4,w:["whistle", "wistle", "whistel", "whissle"]},
+      {t:"mcq",d:4,w:["honest", "honeste", "honnest", "honist"]},
+      {t:"mcq",d:4,w:["hour", "houre", "hower", "huor"]},
+      {t:"mcq",d:4,w:["whole", "wohle", "whol", "wholle"]},
+      {t:"mcq",d:4,w:["science", "sceince", "sience", "scienc"]},
+      {t:"mcq",d:4,w:["ache", "aiche", "ach", "achee"]},
+      {t:"mcq",d:4,w:["sword", "sworde", "swordd", "swoard"]},
+      {t:"mcq",d:4,w:["guard", "gaurd", "gardd", "guardd"]},
+      {t:"mcq",d:4,w:["weird", "wierd", "weired", "wierrd"]},
+      {t:"mcq",d:4,w:["strength", "strenght", "strengh", "strenth"]},
+      {t:"mcq",d:4,w:["twelfth", "twelth", "twelvth", "twelfeth"]},
+      {t:"mcq",d:4,w:["sympathy", "simpathy", "sympethy", "sympathey"]},
+      {t:"mcq",d:4,w:["technique", "techique", "tecnique", "techneque"]},
+      {t:"pick",d:4,o:["necessary", "seperate", "definately", "occurence"],a:"necessary"},
+      {t:"pick",d:4,o:["privilege", "embarass", "recieve", "goverment"],a:"privilege"},
+      {t:"pick",d:4,o:["rhythm", "begining", "calender", "libary"],a:"rhythm"},
+      {t:"pick",d:4,o:["parallel", "dissapoint", "exagerate", "succes"],a:"parallel"},
+      {t:"pick",d:4,o:["mischievous", "independant", "pronounciation", "seperate"],a:"mischievous"},
+      {t:"pick",d:4,o:["courageous", "medecine", "opposit", "langauge"],a:"courageous"},
+      {t:"wrong",d:4,o:["ancient", "ceiling", "desparate", "excellent"],a:"desparate"},
+      {t:"wrong",d:4,o:["February", "government", "occured", "parallel"],a:"occured"},
+      {t:"wrong",d:4,o:["persuade", "privilege", "rythm", "sincerely"],a:"rythm"},
+      {t:"wrong",d:4,o:["vehicle", "literature", "neccessary", "certificate"],a:"neccessary"},
+      {t:"wrong",d:4,o:["straight", "thorough", "seperate", "surprise"],a:"seperate"},
+      {t:"wrong",d:4,o:["foreign", "machine", "stomache", "soldier"],a:"stomache"},
+      {t:"form",d:3,s:"OCCUR + \u2013ed",o:["occurred", "occured", "ocurred", "occurrd"],a:"occurred"},
+      {t:"form",d:3,s:"BEGIN + \u2013ing",o:["beginning", "begining", "beginnning", "beginingg"],a:"beginning"},
+      {t:"form",d:3,s:"ADMIT + \u2013ed",o:["admitted", "admited", "admittted", "admiteed"],a:"admitted"},
+      {t:"form",d:3,s:"PERMIT + \u2013ed",o:["permitted", "permited", "permittted", "permiteed"],a:"permitted"},
+      {t:"form",d:3,s:"FORGET + \u2013ing",o:["forgetting", "forgeting", "forgettting", "forgetng"],a:"forgetting"},
+      {t:"form",d:3,s:"CONTROL + \u2013ed",o:["controlled", "controled", "contolled", "controlld"],a:"controlled"},
+      {t:"form",d:3,s:"PREFER + \u2013ed",o:["preferred", "prefered", "preferrred", "prefererd"],a:"preferred"},
+      {t:"form",d:3,s:"STOP + \u2013ed",o:["stopped", "stoped", "stoppped", "stopeed"],a:"stopped"},
+      {t:"form",d:3,s:"BEAUTY + \u2013ful",o:["beautiful", "beautyful", "beautifull", "beutiful"],a:"beautiful"},
+      {t:"form",d:3,s:"HAPPY + \u2013ness",o:["happiness", "happyness", "happines", "happinness"],a:"happiness"},
+      {t:"form",d:3,s:"TRUE + \u2013ly",o:["truly", "truely", "trully", "truley"],a:"truly"},
+      {t:"form",d:3,s:"COMPLETE + \u2013ly",o:["completely", "completly", "completley", "compleetly"],a:"completely"},
+      {t:"form",d:3,s:"NECESSARY + \u2013ly",o:["necessarily", "necessarly", "neccessarily", "necessarilly"],a:"necessarily"},
+      {t:"form",d:3,s:"The plural of LEAF",o:["leaves", "leafs", "leafes", "leaved"],a:"leaves"},
+      {t:"form",d:3,s:"The plural of KNIFE",o:["knives", "knifes", "knive", "knifs"],a:"knives"},
+      {t:"form",d:3,s:"The plural of BABY",o:["babies", "babys", "babyes", "babbies"],a:"babies"},
+      {t:"form",d:3,s:"The plural of CITY",o:["cities", "citys", "cityes", "citties"],a:"cities"},
+      {t:"form",d:3,s:"The plural of BOX",o:["boxes", "boxs", "boxies", "boxxes"],a:"boxes"},
+      {t:"form",d:3,s:"The plural of CHURCH",o:["churches", "churchs", "churchies", "churchess"],a:"churches"},
+      {t:"form",d:3,s:"The plural of POTATO",o:["potatoes", "potatos", "potatoe", "potatoses"],a:"potatoes"},
+      {t:"form",d:4,s:"The plural of THIEF",o:["thieves", "thiefs", "thieffs", "theives"],a:"thieves"},
+      {t:"form",d:4,s:"The plural of LOAF",o:["loaves", "loafs", "loafes", "loavs"],a:"loaves"},
+      {t:"form",d:4,s:"The plural of HERO",o:["heroes", "heros", "heroe", "heroses"],a:"heroes"},
+      {t:"form",d:4,s:"The plural of PIANO",o:["pianos", "pianoes", "pianoses", "pianoos"],a:"pianos"},
+      {t:"form",d:4,s:"The plural of DIARY",o:["diaries", "diarys", "diarves", "diarries"],a:"diaries"},
+      {t:"form",d:4,s:"The plural of WOMAN",o:["women", "womans", "womens", "womin"],a:"women"},
+      {t:"form",d:4,s:"The noun formed from EXPLAIN",o:["explanation", "explaination", "explanaton", "explanashion"],a:"explanation"},
+      {t:"form",d:4,s:"The noun formed from PRONOUNCE",o:["pronunciation", "pronounciation", "pronuncation", "pronunciaton"],a:"pronunciation"},
+      {t:"form",d:4,s:"The noun formed from MAINTAIN",o:["maintenance", "maintainance", "maintenence", "maintanance"],a:"maintenance"},
+      {t:"form",d:4,s:"The noun formed from CURIOUS",o:["curiosity", "curiousity", "curiosety", "curiosoty"],a:"curiosity"},
+      {t:"form",d:4,s:"The noun formed from GENEROUS",o:["generosity", "generousity", "generosety", "genorosity"],a:"generosity"},
+      {t:"form",d:4,s:"The noun formed from ARGUE",o:["argument", "arguement", "argumment", "arguemant"],a:"argument"},
+      {t:"form",d:4,s:"The noun formed from HIGH",o:["height", "heighth", "hight", "heigth"],a:"height"},
+      {t:"form",d:4,s:"The noun formed from WIDE",o:["width", "widht", "wideth", "widthe"],a:"width"},
+      {t:"form",d:4,s:"The noun formed from LONG",o:["length", "lenght", "lengh", "lenth"],a:"length"},
+      {t:"form",d:4,s:"The noun formed from STRONG",o:["strength", "strenght", "strengh", "strenth"],a:"strength"},
+      {t:"form",d:4,s:"The noun formed from DEEP",o:["depth", "debth", "depht", "deepth"],a:"depth"},
+      {t:"form",d:4,s:"The ordinal of NINE",o:["ninth", "nineth", "ninnth", "niinth"],a:"ninth"},
+      {t:"form",d:4,s:"The ordinal of TWELVE",o:["twelfth", "twelth", "twelvth", "twelfeth"],a:"twelfth"},
+      {t:"form",d:4,s:"The ordinal of EIGHT",o:["eighth", "eigth", "eightth", "eighteh"],a:"eighth"}
+    ]
+  },
+
+  senior: {
+    label:"Classes 6 to 8", mins:20, take:[0, 4, 8, 10],
+    q:[
+      {t:"mcq",d:1,w:["achievement", "acheivement", "achievment", "achievemant"]},
+      {t:"mcq",d:1,w:["committee", "commitee", "comittee", "committe"]},
+      {t:"mcq",d:1,w:["guarantee", "gaurantee", "garantee", "guarentee"]},
+      {t:"mcq",d:1,w:["possession", "posession", "possesion", "posesion"]},
+      {t:"mcq",d:1,w:["unnecessary", "unecessary", "unneccessary", "unnecesary"]},
+      {t:"mcq",d:1,w:["vacuum", "vaccum", "vacume", "vaccuum"]},
+      {t:"mcq",d:1,w:["threshold", "threshhold", "thresold", "thresholde"]},
+      {t:"mcq",d:1,w:["recommend", "reccommend", "recomend", "reccomend"]},
+      {t:"mcq",d:1,w:["accommodate", "accomodate", "acommodate", "accommodete"]},
+      {t:"mcq",d:1,w:["acknowledge", "aknowledge", "acknowlege", "acknowledje"]},
+      {t:"mcq",d:1,w:["amateur", "amature", "ameteur", "amatuer"]},
+      {t:"mcq",d:1,w:["cemetery", "cemetary", "cemetry", "semetery"]},
+      {t:"mcq",d:1,w:["conscious", "concious", "consious", "conscius"]},
+      {t:"mcq",d:1,w:["definitely", "definately", "definitly", "defenitely"]},
+      {t:"mcq",d:1,w:["embarrass", "embarass", "embarras", "embbarrass"]},
+      {t:"mcq",d:1,w:["exaggerate", "exagerate", "exaggarate", "exeggerate"]},
+      {t:"mcq",d:1,w:["harass", "harrass", "haras", "harras"]},
+      {t:"mcq",d:1,w:["hierarchy", "heirarchy", "hierachy", "hierarcy"]},
+      {t:"mcq",d:1,w:["millennium", "millenium", "milennium", "millenneum"]},
+      {t:"mcq",d:1,w:["mischievous", "mischievious", "mischevous", "mischeivous"]},
+      {t:"mcq",d:1,w:["noticeable", "noticable", "noticeble", "noticiable"]},
+      {t:"mcq",d:1,w:["occurrence", "occurence", "ocurrence", "occurrance"]},
+      {t:"mcq",d:1,w:["parliament", "parlaiment", "parlament", "parliment"]},
+      {t:"mcq",d:1,w:["privilege", "priviledge", "privelege", "privilage"]},
+      {t:"mcq",d:1,w:["pronunciation", "pronounciation", "pronuciation", "pronunciaton"]},
+      {t:"mcq",d:2,w:["conscientious", "consciencious", "conscientous", "concientious"]},
+      {t:"mcq",d:2,w:["occasionally", "occasionaly", "ocassionally", "occassionally"]},
+      {t:"mcq",d:2,w:["nuisance", "nuisence", "nusance", "nuiscance"]},
+      {t:"mcq",d:2,w:["exceed", "excede", "exeed", "exseed"]},
+      {t:"mcq",d:2,w:["entrepreneur", "entrepeneur", "enterpreneur", "entreprenuer"]},
+      {t:"mcq",d:2,w:["perseverance", "perseverence", "persaverance", "perserverance"]},
+      {t:"mcq",d:2,w:["questionnaire", "questionaire", "questionnair", "questionniare"]},
+      {t:"mcq",d:2,w:["inoculate", "innoculate", "inocculate", "inoculete"]},
+      {t:"mcq",d:2,w:["ingenious", "ingenius", "ingeneous", "injenious"]},
+      {t:"mcq",d:2,w:["chauffeur", "chauffer", "chaufeur", "shauffeur"]},
+      {t:"mcq",d:2,w:["gauge", "guage", "gaudge", "gaugue"]},
+      {t:"mcq",d:2,w:["plagiarism", "plagarism", "plagiarizm", "plagerism"]},
+      {t:"mcq",d:2,w:["pharaoh", "pharoah", "faroah", "pharaohh"]},
+      {t:"mcq",d:2,w:["playwright", "playwrite", "playright", "playwrigt"]},
+      {t:"mcq",d:2,w:["silhouette", "silhouete", "sillhouette", "silouette"]},
+      {t:"mcq",d:2,w:["subtlety", "subtelty", "subtility", "subtletly"]},
+      {t:"mcq",d:2,w:["tendency", "tendancy", "tendensy", "tendencie"]},
+      {t:"mcq",d:2,w:["ecstasy", "ecstacy", "extasy", "ecstassy"]},
+      {t:"mcq",d:2,w:["exhilarate", "exhilerate", "exilarate", "exhillarate"]},
+      {t:"mcq",d:2,w:["hygiene", "hygeine", "hygene", "hygienne"]},
+      {t:"mcq",d:2,w:["inconceivable", "inconcievable", "inconceiveable", "inconceivible"]},
+      {t:"mcq",d:2,w:["indispensable", "indispensible", "indespensable", "indispenseble"]},
+      {t:"mcq",d:2,w:["irresistible", "irresistable", "iresistible", "irrestible"]},
+      {t:"mcq",d:2,w:["maintenance", "maintainance", "maintenence", "maintanance"]},
+      {t:"mcq",d:2,w:["misspell", "mispell", "misspel", "mispel"]},
+      {t:"mcq",d:2,w:["pastime", "passtime", "pasttime", "pastyme"]},
+      {t:"mcq",d:2,w:["personnel", "personel", "personell", "personnell"]},
+      {t:"mcq",d:2,w:["precede", "preceed", "preceede", "prosede"]},
+      {t:"mcq",d:2,w:["publicly", "publically", "publicaly", "publicley"]},
+      {t:"mcq",d:2,w:["receipt", "reciept", "receit", "receipte"]},
+      {t:"mcq",d:2,w:["relevant", "relevent", "revelant", "relavant"]},
+      {t:"mcq",d:2,w:["ridiculous", "rediculous", "ridiculus", "ridicolous"]},
+      {t:"mcq",d:2,w:["schedule", "schedual", "shedule", "schedulle"]},
+      {t:"mcq",d:2,w:["seize", "sieze", "seeze", "siez"]},
+      {t:"mcq",d:2,w:["siege", "seige", "seege", "sige"]},
+      {t:"mcq",d:2,w:["sergeant", "sargeant", "sergent", "sergant"]},
+      {t:"mcq",d:2,w:["souvenir", "souvenier", "suvenir", "souvenire"]},
+      {t:"mcq",d:2,w:["specifically", "specificaly", "spesifically", "specifivally"]},
+      {t:"mcq",d:2,w:["twelfth", "twelth", "twelvth", "twelfeth"]},
+      {t:"mcq",d:2,w:["withhold", "withold", "withhould", "wihhold"]},
+      {t:"mcq",d:2,w:["liaison", "liason", "liasion", "liaisson"]},
+      {t:"mcq",d:2,w:["rhythm", "rythm", "rhythem", "rhytm"]},
+      {t:"mcq",d:2,w:["surveillance", "surveilance", "survellance", "surveillence"]},
+      {t:"mcq",d:2,w:["fluorescent", "flourescent", "fluorescant", "flourescant"]},
+      {t:"mcq",d:2,w:["conscience", "concience", "conscence", "consience"]},
+      {t:"mcq",d:2,w:["bureau", "burea", "bureaeu", "buraeu"]},
+      {t:"mcq",d:2,w:["tyranny", "tyrany", "tryanny", "tyrrany"]},
+      {t:"mcq",d:2,w:["temperament", "temprament", "temperment", "temparament"]},
+      {t:"mcq",d:2,w:["vengeance", "vengance", "vengeanse", "venjeance"]},
+      {t:"mcq",d:2,w:["camouflage", "camoflage", "camouflauge", "camaflage"]},
+      {t:"mcq",d:2,w:["hypocrisy", "hipocrisy", "hypocrasy", "hypocricy"]},
+      {t:"err",d:2,s:"His acheivement was praised by the whole school.",o:["acheivement", "praised", "whole", "school"],a:"acheivement"},
+      {t:"err",d:2,s:"She gave a breif explanation of the experiment.",o:["breif", "explanation", "experiment", "gave"],a:"breif"},
+      {t:"err",d:2,s:"The commitee met on Friday to discuss the budget.",o:["commitee", "discuss", "budget", "Friday"],a:"commitee"},
+      {t:"err",d:2,s:"It was an embarassing moment for the whole team.",o:["embarassing", "moment", "whole", "team"],a:"embarassing"},
+      {t:"err",d:2,s:"The maintainance of the building was neglected.",o:["maintainance", "building", "neglected", "was"],a:"maintainance"},
+      {t:"err",d:2,s:"He recieved an award for his perseverance.",o:["recieved", "award", "perseverance", "for"],a:"recieved"},
+      {t:"err",d:2,s:"The occurence of such storms is rare.",o:["occurence", "storms", "rare", "such"],a:"occurence"},
+      {t:"mcq",d:3,w:["bureaucracy", "beaurocracy", "bureacracy", "bureaucrasy"]},
+      {t:"mcq",d:3,w:["obsequious", "obsequous", "obseqious", "obsequiuos"]},
+      {t:"mcq",d:3,w:["surreptitious", "sureptitious", "surrepititious", "surreptious"]},
+      {t:"mcq",d:3,w:["idiosyncrasy", "idiosyncracy", "idiosincrasy", "idiosyncrisy"]},
+      {t:"mcq",d:3,w:["sacrilegious", "sacriligious", "sacreligious", "sacrilegous"]},
+      {t:"mcq",d:3,w:["desiccate", "dessicate", "desicate", "dessiccate"]},
+      {t:"mcq",d:3,w:["renaissance", "renaisance", "rennaissance", "renaissence"]},
+      {t:"mcq",d:3,w:["connoisseur", "connoiseur", "conoisseur", "connosieur"]},
+      {t:"mcq",d:3,w:["camaraderie", "camaderie", "comraderie", "camaraderi"]},
+      {t:"mcq",d:3,w:["fuchsia", "fuschia", "fuchia", "fushcia"]},
+      {t:"mcq",d:3,w:["bourgeois", "bourgois", "bourgeoise", "bougeois"]},
+      {t:"mcq",d:3,w:["dilettante", "dilletante", "dilettant", "dilettonte"]},
+      {t:"mcq",d:3,w:["aficionado", "afficionado", "aficionardo", "aficianado"]},
+      {t:"mcq",d:3,w:["vacillate", "vascillate", "vacilate", "vasillate"]},
+      {t:"mcq",d:3,w:["weird", "wierd", "weired", "wierrd"]},
+      {t:"mcq",d:3,w:["Fahrenheit", "Farenheit", "Fahrenhiet", "Fahrinheit"]},
+      {t:"mcq",d:3,w:["rendezvous", "rendevous", "rendezvouz", "rendesvous"]},
+      {t:"mcq",d:3,w:["onomatopoeia", "onomatopeia", "onomatopoia", "onomotopoeia"]},
+      {t:"mcq",d:3,w:["Mediterranean", "Mediteranean", "Meditteranean", "Mediterranian"]},
+      {t:"mcq",d:3,w:["pneumonia", "pnuemonia", "neumonia", "pneumonea"]},
+      {t:"mcq",d:3,w:["diaphragm", "diaphram", "diapragm", "diaphragmm"]},
+      {t:"mcq",d:3,w:["reconnaissance", "reconnaisance", "reconaissance", "reconnasance"]},
+      {t:"mcq",d:3,w:["paraphernalia", "paraphenalia", "parafernalia", "paraphrenalia"]},
+      {t:"mcq",d:3,w:["chrysanthemum", "chrysanthimum", "chrisanthemum", "chrysantemum"]},
+      {t:"cloze",d:3,s:"The head of a school is called the ____.",o:["principal", "principle", "principel", "princeple"],a:"principal"},
+      {t:"cloze",d:3,s:"She refused to lie, as a matter of ____.",o:["principle", "principal", "principel", "princeple"],a:"principle"},
+      {t:"cloze",d:3,s:"The sauce is a perfect ____ to the fish.",o:["complement", "compliment", "compliement", "complimant"],a:"complement"},
+      {t:"cloze",d:3,s:"He paid her a ____ on her speech.",o:["compliment", "complement", "complimment", "complemant"],a:"compliment"},
+      {t:"cloze",d:3,s:"Buy some ____ for the office: pens, paper and clips.",o:["stationery", "stationary", "stationnery", "stationarry"],a:"stationery"},
+      {t:"cloze",d:3,s:"The car remained ____ at the traffic signal.",o:["stationary", "stationery", "stationnary", "stationarry"],a:"stationary"},
+      {t:"cloze",d:3,s:"Please be ____ about what I told you.",o:["discreet", "discrete", "discreete", "discret"],a:"discreet"},
+      {t:"cloze",d:3,s:"The data falls into three ____ categories.",o:["discrete", "discreet", "discreete", "discret"],a:"discrete"},
+      {t:"cloze",d:3,s:"The city ____ met to pass the budget.",o:["council", "counsel", "counsil", "councel"],a:"council"},
+      {t:"cloze",d:3,s:"The lawyer will ____ his client before the trial.",o:["counsel", "council", "counsil", "councel"],a:"counsel"},
+      {t:"cloze",d:3,s:"They crossed the ____ on camels.",o:["desert", "dessert", "dessart", "desart"],a:"desert"},
+      {t:"cloze",d:3,s:"We had ice cream for ____.",o:["dessert", "desert", "dessart", "desart"],a:"dessert"},
+      {t:"cloze",d:3,s:"The new rule will ____ the whole school.",o:["affect", "effect", "effekt", "affekt"],a:"affect"},
+      {t:"cloze",d:3,s:"The medicine had little ____ on the fever.",o:["effect", "affect", "effekt", "affekt"],a:"effect"},
+      {t:"cloze",d:3,s:"He was arrested for ____ trading in shares.",o:["illicit", "elicit", "ilicit", "elicet"],a:"illicit"},
+      {t:"cloze",d:3,s:"The questions were designed to ____ a response.",o:["elicit", "illicit", "ilicit", "elicet"],a:"elicit"},
+      {t:"cloze",d:3,s:"The ____ of the mountain took six hours.",o:["ascent", "assent", "acent", "assant"],a:"ascent"},
+      {t:"cloze",d:3,s:"The committee gave its ____ to the proposal.",o:["assent", "ascent", "acent", "assant"],a:"assent"},
+      {t:"cloze",d:3,s:"Do not ____ your temper during the match.",o:["lose", "loose", "loze", "looze"],a:"lose"},
+      {t:"cloze",d:3,s:"The knot came ____ during the climb.",o:["loose", "lose", "loce", "looce"],a:"loose"},
+      {t:"cloze",d:3,s:"____ going to announce the results tomorrow.",o:["They're", "Their", "There", "Theyre"],a:"They're"},
+      {t:"cloze",d:3,s:"____ coat is hanging by the door?",o:["Whose", "Who's", "Whos", "Whoes"],a:"Whose"},
+      {t:"mcq",d:4,w:["acquiesce", "aquiesce", "acquiese", "acquiesse"]},
+      {t:"mcq",d:4,w:["anachronism", "anacronism", "anachronsim", "anachronizm"]},
+      {t:"mcq",d:4,w:["apocryphal", "apocriphal", "apochryphal", "apocryphel"]},
+      {t:"mcq",d:4,w:["archipelago", "archipelego", "archepelago", "archipellago"]},
+      {t:"mcq",d:4,w:["belligerent", "beligerent", "belligerant", "belligerrent"]},
+      {t:"mcq",d:4,w:["cacophony", "caccophony", "cacophany", "cacaphony"]},
+      {t:"mcq",d:4,w:["colloquial", "coloquial", "colloquiel", "colloqial"]},
+      {t:"mcq",d:4,w:["consensus", "concensus", "consesus", "consensuss"]},
+      {t:"mcq",d:4,w:["corollary", "corrollary", "corolary", "corollery"]},
+      {t:"mcq",d:4,w:["dachshund", "dachsund", "daschund", "dachshound"]},
+      {t:"mcq",d:4,w:["diphtheria", "diptheria", "diphteria", "diphtheriaa"]},
+      {t:"mcq",d:4,w:["ebullient", "ebulient", "ebbullient", "ebullent"]},
+      {t:"mcq",d:4,w:["effervescent", "efervescent", "effervescant", "effervesent"]},
+      {t:"mcq",d:4,w:["egregious", "egregous", "eggregious", "egregeous"]},
+      {t:"mcq",d:4,w:["epitome", "epitomy", "epitomee", "epitomme"]},
+      {t:"mcq",d:4,w:["equanimity", "equinimity", "equanimety", "equanimmity"]},
+      {t:"mcq",d:4,w:["erroneous", "erronious", "eroneous", "erroneus"]},
+      {t:"mcq",d:4,w:["esoteric", "esoterric", "essoteric", "esotric"]},
+      {t:"mcq",d:4,w:["euphemism", "euphamism", "euphemisim", "eupehmism"]},
+      {t:"mcq",d:4,w:["exacerbate", "exascerbate", "exacerbete", "exaccerbate"]},
+      {t:"mcq",d:4,w:["facsimile", "facsimilie", "faxsimile", "facsimille"]},
+      {t:"mcq",d:4,w:["flabbergasted", "flabergasted", "flabbergasteed", "flabbagasted"]},
+      {t:"mcq",d:4,w:["gregarious", "gregarous", "gregareous", "greggarious"]},
+      {t:"mcq",d:4,w:["harangue", "harangu", "harrangue", "haranguee"]},
+      {t:"mcq",d:4,w:["hyperbole", "hyperboly", "hyperbolee", "hiperbole"]},
+      {t:"mcq",d:4,w:["ignominious", "ignomineous", "ignominous", "ignomminious"]},
+      {t:"mcq",d:4,w:["impeccable", "impecable", "impeccible", "impeccabel"]},
+      {t:"mcq",d:4,w:["incandescent", "incandesent", "incandescant", "inccandescent"]},
+      {t:"mcq",d:4,w:["indefatigable", "indefatigible", "indefatiguable", "indefatigabel"]},
+      {t:"mcq",d:4,w:["ineffable", "inefable", "ineffible", "ineffabel"]},
+      {t:"mcq",d:4,w:["innuendo", "inuendo", "innuendoe", "innundeo"]},
+      {t:"mcq",d:4,w:["intransigent", "intransigant", "intransegent", "intrasigent"]},
+      {t:"mcq",d:4,w:["juxtapose", "juxtupose", "juxtaposse", "juxtappose"]},
+      {t:"mcq",d:4,w:["kaleidoscope", "kaledoscope", "kaleidascope", "kalidoscope"]},
+      {t:"mcq",d:4,w:["labyrinth", "labrinth", "labyrinthe", "labyrenth"]},
+      {t:"mcq",d:4,w:["lackadaisical", "lackadasical", "lakadaisical", "lackadaisicle"]},
+      {t:"mcq",d:4,w:["magnanimous", "magnanimus", "magnaminous", "magnanimious"]},
+      {t:"mcq",d:4,w:["mellifluous", "meliflous", "mellifluos", "mellifluious"]},
+      {t:"mcq",d:4,w:["mnemonic", "nemonic", "mnemomic", "mnemonik"]},
+      {t:"mcq",d:4,w:["nonchalant", "nonchalent", "noncholant", "nonchalantt"]},
+      {t:"mcq",d:4,w:["obfuscate", "obfusicate", "obfuscat", "obsfucate"]},
+      {t:"mcq",d:4,w:["panacea", "panecea", "panasea", "panaceaa"]},
+      {t:"mcq",d:4,w:["paradigm", "paradym", "paradgim", "paradime"]},
+      {t:"mcq",d:4,w:["parochial", "parochiel", "parrochial", "parochail"]},
+      {t:"mcq",d:4,w:["pernicious", "pernicous", "pernitious", "pernicius"]},
+      {t:"mcq",d:4,w:["perspicacious", "perspicacous", "perspecacious", "perspicatious"]},
+      {t:"mcq",d:4,w:["phlegmatic", "flegmatic", "phlegmattic", "phlegmatick"]},
+      {t:"mcq",d:4,w:["plethora", "plethera", "plathora", "plethorra"]},
+      {t:"mcq",d:4,w:["precocious", "precocius", "precotious", "preccocious"]},
+      {t:"mcq",d:4,w:["prerogative", "perogative", "prerogitive", "prerrogative"]},
+      {t:"mcq",d:4,w:["propitious", "propitous", "propicious", "proppitious"]},
+      {t:"mcq",d:4,w:["quintessential", "quintessencial", "quintessentail", "quintesential"]},
+      {t:"mcq",d:4,w:["recalcitrant", "recalcitrent", "recalictrant", "reccalcitrant"]},
+      {t:"mcq",d:4,w:["sanguine", "sanguin", "sangwine", "sanguinne"]},
+      {t:"mcq",d:4,w:["soliloquy", "soliliquy", "solliloquy", "soliloquey"]},
+      {t:"mcq",d:4,w:["sycophant", "sychophant", "sycophent", "sicophant"]},
+      {t:"mcq",d:4,w:["ubiquitous", "ubiquitious", "ubiqitous", "ubiquitus"]},
+      {t:"mcq",d:4,w:["unctuous", "unctous", "unctuious", "uncteous"]},
+      {t:"mcq",d:4,w:["vicissitude", "vicisitude", "vissicitude", "vicissetude"]},
+      {t:"mcq",d:4,w:["vociferous", "vociferus", "vociferious", "vocipherous"]},
+      {t:"pick",d:4,o:["accommodate", "embarass", "occurence", "priviledge"],a:"accommodate"},
+      {t:"pick",d:4,o:["conscientious", "liason", "questionaire", "perseverence"],a:"conscientious"},
+      {t:"pick",d:4,o:["surveillance", "millenium", "harrass", "noticable"],a:"surveillance"},
+      {t:"pick",d:4,o:["idiosyncrasy", "recieve", "seperate", "definately"],a:"idiosyncrasy"},
+      {t:"pick",d:4,o:["parliament", "pronounciation", "mischievious", "hierachy"],a:"parliament"},
+      {t:"pick",d:4,o:["exaggerate", "concious", "tempermant", "vengance"],a:"exaggerate"},
+      {t:"wrong",d:4,o:["camaraderie", "connoisseur", "sacreligious", "renaissance"],a:"sacreligious"},
+      {t:"wrong",d:4,o:["bureaucracy", "chrysanthemum", "paraphenalia", "reconnaissance"],a:"paraphenalia"},
+      {t:"wrong",d:4,o:["silhouette", "questionnaire", "perseverence", "conscience"],a:"perseverence"},
+      {t:"wrong",d:4,o:["fluorescent", "surveillance", "occurence", "threshold"],a:"occurence"},
+      {t:"wrong",d:4,o:["hypocrisy", "tyranny", "desicate", "temperament"],a:"desicate"},
+      {t:"wrong",d:4,o:["indispensable", "irresistible", "inconcievable", "impeccable"],a:"inconcievable"},
+      {t:"form",d:3,s:"REFER + \u2013ed",o:["referred", "refered", "referrred", "refererd"],a:"referred"},
+      {t:"form",d:3,s:"COMMIT + \u2013ed",o:["committed", "commited", "committted", "commiteed"],a:"committed"},
+      {t:"form",d:3,s:"OMIT + \u2013ed",o:["omitted", "omited", "omittted", "omiteed"],a:"omitted"},
+      {t:"form",d:3,s:"EQUIP + \u2013ed",o:["equipped", "equiped", "equippped", "equipeed"],a:"equipped"},
+      {t:"form",d:3,s:"REGRET + \u2013ed",o:["regretted", "regreted", "regrettted", "regreteed"],a:"regretted"},
+      {t:"form",d:3,s:"NOTICE + \u2013able",o:["noticeable", "noticable", "noticeble", "noticiable"],a:"noticeable"},
+      {t:"form",d:3,s:"MANAGE + \u2013able",o:["manageable", "managable", "manageble", "managiable"],a:"manageable"},
+      {t:"form",d:3,s:"COURAGE + \u2013ous",o:["courageous", "couragous", "courageus", "couragious"],a:"courageous"},
+      {t:"form",d:3,s:"PUBLIC + \u2013ly",o:["publicly", "publically", "publicaly", "publicley"],a:"publicly"},
+      {t:"form",d:3,s:"BASIC + \u2013ly",o:["basically", "basicly", "basicaly", "basiclly"],a:"basically"},
+      {t:"form",d:4,s:"TRANSFER + \u2013ing",o:["transferring", "transfering", "transferrring", "transferingg"],a:"transferring"},
+      {t:"form",d:4,s:"PROPEL + \u2013ing",o:["propelling", "propeling", "propellling", "propelingg"],a:"propelling"},
+      {t:"form",d:4,s:"COMPEL + \u2013ed",o:["compelled", "compeled", "compellled", "compeleed"],a:"compelled"},
+      {t:"form",d:4,s:"EXPEL + \u2013ed",o:["expelled", "expeled", "expellled", "expeleed"],a:"expelled"},
+      {t:"form",d:4,s:"APPEAR + \u2013ance",o:["appearance", "appearence", "apperance", "appearanse"],a:"appearance"},
+      {t:"form",d:4,s:"EXIST + \u2013ence",o:["existence", "existance", "existense", "existince"],a:"existence"},
+      {t:"form",d:4,s:"OCCUR + \u2013ence",o:["occurrence", "occurence", "ocurrence", "occurrance"],a:"occurrence"},
+      {t:"form",d:4,s:"The adjective from ANXIETY",o:["anxious", "anxius", "anxeous", "anxioius"],a:"anxious"},
+      {t:"form",d:4,s:"The noun formed from PROCEED",o:["procedure", "proceedure", "procedur", "procidure"],a:"procedure"},
+      {t:"form",d:4,s:"The noun formed from CONSCIOUS",o:["consciousness", "conciousness", "consciousnes", "conscousness"],a:"consciousness"},
+      {t:"form",d:4,s:"The noun formed from PERSUADE",o:["persuasion", "persuation", "perswasion", "persuassion"],a:"persuasion"},
+      {t:"form",d:4,s:"The noun formed from DECIDE",o:["decision", "decission", "desicion", "decisoin"],a:"decision"},
+      {t:"form",d:4,s:"The noun formed from PERMIT",o:["permission", "permision", "permmission", "permisson"],a:"permission"},
+      {t:"form",d:4,s:"The noun formed from OMIT",o:["omission", "omision", "ommission", "omisson"],a:"omission"},
+      {t:"form",d:4,s:"The adjective from MISCHIEF",o:["mischievous", "mischievious", "mischevous", "mischeivous"],a:"mischievous"},
+      {t:"form",d:4,s:"The adjective from BENEFIT",o:["beneficial", "benificial", "beneficiall", "benefitial"],a:"beneficial"},
+      {t:"form",d:4,s:"The adjective from SUBSTANCE",o:["substantial", "substancial", "substantiall", "substansial"],a:"substantial"},
+      {t:"form",d:4,s:"The adjective from CONTROVERSY",o:["controversial", "controversal", "controvertial", "controversiel"],a:"controversial"},
+      {t:"form",d:4,s:"The adjective from CIRCUMSTANCE",o:["circumstantial", "circumstancial", "circumstantiel", "circumstansial"],a:"circumstantial"},
+      {t:"form",d:4,s:"The plural of CRITERION",o:["criteria", "criterions", "criterias", "criterionae"],a:"criteria"},
+      {t:"form",d:4,s:"The plural of PHENOMENON",o:["phenomena", "phenomenons", "phenomenas", "phenomenae"],a:"phenomena"},
+      {t:"form",d:4,s:"The plural of CRISIS",o:["crises", "crisises", "crisees", "crisises'"],a:"crises"},
+      {t:"form",d:4,s:"The plural of PARENTHESIS",o:["parentheses", "parenthesises", "parentheseses", "parenthesees"],a:"parentheses"},
+      {t:"form",d:4,s:"The plural of HYPOTHESIS",o:["hypotheses", "hypothesises", "hypotheseses", "hypothesees"],a:"hypotheses"},
+      {t:"form",d:4,s:"The plural of OASIS",o:["oases", "oasises", "oaseses", "oasees"],a:"oases"},
+      {t:"form",d:4,s:"The plural of BASIS",o:["bases", "basises", "baseses", "basees"],a:"bases"},
+      {t:"form",d:4,s:"The plural of AXIS",o:["axes", "axises", "axeses", "axees"],a:"axes"},
+      {t:"form",d:4,s:"The plural of DIAGNOSIS",o:["diagnoses", "diagnosises", "diagnoseses", "diagnosees"],a:"diagnoses"}
+    ]
+  }
+};
+/* ===================== SHARED SCHOOL RECORD =====================
+   Every result is written straight into one shared store the moment a
+   child finishes, from whichever computer they used. The teacher view
+   reads that same store, so nothing is ever collected or merged.
+   If the shared store is unreachable, results are held on the machine
+   and can still be copied out — nothing is ever lost silently.
+   ================================================================ */
+const HAS_STORE = !!(window.storage && window.storage.set);
+let SESSION = "BEE2026", PIN = "2026", STATION = "PC", EXTRA = 0;
+const LOCAL = [];                       // fallback + this machine's own copy
+
+/* keys may not contain spaces, slashes or quotes — strip anything else out */
+const safe = v => String(v).toUpperCase().replace(/[^A-Z0-9]/g, "");
+const keyFor = r => ("bee-" + SESSION + "-c" + safe(r.cls) + safe(r.sec) + "-r" + safe(r.roll)).slice(0, 190);
+
+async function saveResult(rec){
+  LOCAL.push(rec);
+  if(!HAS_STORE) return { ok:false, why:"offline" };
+  for(let attempt = 1; attempt <= 3; attempt++){
+    try {
+      await window.storage.set(keyFor(rec), JSON.stringify(rec), true);
+      return { ok:true };
+    } catch(e){
+      if(attempt === 3) return { ok:false, why:"failed" };
+      await new Promise(r => setTimeout(r, 400 * attempt));
+    }
+  }
+}
+
+/* The first person to open an event code owns it, and their PIN is stored with
+   the event. Anyone else opening the same code joins as a student device only —
+   choosing a different PIN on their own machine gains them nothing. */
+let CONFIG = null;
+function hash(s){
+  let x = 0x811c9dc5;
+  for(let i=0;i<s.length;i++){ x ^= s.charCodeAt(i); x = Math.imul(x, 0x01000193) >>> 0; }
+  return x.toString(36).toUpperCase();
+}
+
+async function ensureConfig(){
+  if(!HAS_STORE){ CONFIG = { pin: hash(PIN + "|" + SESSION), owner:true }; return CONFIG; }
+  const k = "bee-" + SESSION + "-config";
+  try {
+    const r = await window.storage.get(k, true);
+    CONFIG = JSON.parse(r.value); CONFIG.owner = false;
+  } catch(e){
+    CONFIG = { pin: hash(PIN + "|" + SESSION), made:new Date().toISOString() };
+    try { await window.storage.set(k, JSON.stringify(CONFIG), true); CONFIG.owner = true; }
+    catch(e2){ CONFIG.owner = true; }
+  }
+  return CONFIG;
+}
+
+async function alreadySat(cls, sec, roll){
+  if(!HAS_STORE) return false;
+  try {
+    const r = await window.storage.get(keyFor({cls, sec, roll}), true);
+    return !!r;
+  } catch(e){ return false; }        // a missing key throws — that means not sat
+}
+
+async function loadAll(onProgress){
+  if(!HAS_STORE) return LOCAL.slice();
+  let keys = [];
+  try {
+    const res = await window.storage.list("bee-" + SESSION + "-", true);
+    keys = (res && res.keys) ? res.keys : [];
+  } catch(e){ return LOCAL.slice(); }
+  const out = [], size = 6;
+  for(let i = 0; i < keys.length; i += size){
+    const batch = keys.slice(i, i + size).map(async k => {
+      try {
+        const r = await window.storage.get(k, true);
+        if(r && r.value) out.push(JSON.parse(r.value));
+      } catch(e){}
+    });
+    await Promise.all(batch);
+    if(onProgress) onProgress(Math.min(i + size, keys.length), keys.length);
+  }
+  LOCAL.forEach(l => { if(!out.some(o => o.cls===l.cls && o.sec===l.sec && o.roll===l.roll)) out.push(l); });
+  return out;
+}
+
+/* ============================== ENGINE ============================== */
+const $ = id => document.getElementById(id);
+const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const bandOf = c => c <= 5 ? "subjunior" : "senior";
+const bandName = c => (parseInt(c)||0) <= 5 ? "Classes 3 to 5" : "Classes 6 to 8";
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const MARKS = {1:1, 2:1, 3:2, 4:3};
+
+let paper=[], idx=0, score=0, total=0, pick=null, endAt=0, ticker=null, student={};
+
+/* ---------- 0 · setup ---------- */
+$("netline").textContent = HAS_STORE
+  ? "Shared record available — results from every computer will be pooled automatically."
+  : "Shared record unavailable on this machine. Results will be kept here and can be copied out from the teacher screen.";
+
+$("begin").onclick = async () => {
+  SESSION = ($("session").value.trim() || "BEE2026").replace(/[^A-Za-z0-9-]/g,"").toUpperCase();
+  PIN     = $("pin").value.trim() || "2026";
+  STATION = $("station").value.trim() || "PC";
+  EXTRA   = Math.max(0, Math.min(20, parseInt($("extra").value) || 0));
+  $("begin").disabled = true; $("begin").textContent = "Connecting…";
+  await ensureConfig();
+  $("begin").disabled = false; $("begin").textContent = "Open for students";
+  $("setup").style.display = "none";
+  $("teachBtn").style.display = "block";
+  JOINED = !CONFIG.owner;
+  showEntry();
+};
+let JOINED = false;
+
+function hideAll(){ ["entry","quiz","done","sheet"].forEach(i => $(i).style.display="none"); }
+function showEntry(){
+  ["nm","sec","rl"].forEach(i => $(i).value = "");
+  $("cl").value=""; $("bandline").textContent=""; $("entryErr").textContent="";
+  $("go").disabled = true; $("stage").classList.remove("wide");
+  $("joinline").textContent = !HAS_STORE ? ""
+    : (JOINED ? "Joined event " + SESSION + " — results go to the same record as every other computer."
+              : "Event " + SESSION + " started. Other computers using this code will join it.");
+  hideAll(); $("entry").style.display="block"; $("nm").focus();
+}
+
+/* ---------- 1 · entry ---------- */
+$("nm").oninput = $("sec").oninput = $("rl").oninput = $("cl").onchange = check;
+function check(){
+  const c = $("cl").value;
+  $("bandline").textContent = c
+    ? "Paper: " + BANK[bandOf(+c)].label + " — " + BANK[bandOf(+c)].mins + " minutes" : "";
+  $("go").disabled = !($("nm").value.trim() && c && $("rl").value.trim());
+}
+
+$("go").onclick = async () => {
+  const cls = +$("cl").value, key = bandOf(cls);
+  const sec = $("sec").value.trim().toUpperCase() || "-";
+  const roll = $("rl").value.trim();
+  $("go").disabled = true; $("entryErr").textContent = "";
+
+  if(await alreadySat(cls, sec, roll)){
+    $("entryErr").textContent =
+      "A result already exists for Class " + cls + sec + ", roll " + roll +
+      ". Call your teacher — do not attempt the paper twice.";
+    $("go").disabled = false; return;
+  }
+
+  student = { name:$("nm").value.trim(), cls, sec, roll, band:BANK[key].label };
+  paper = buildPaper(key); idx = 0; score = 0;
+  total = paper.reduce((s,q) => s + MARKS[q.d], 0);
+  $("comb").innerHTML = paper.map(() => '<span class="cell"></span>').join("");
+  $("alarm").style.display = "none";
+  hideAll(); $("quiz").style.display = "block";
+  endAt = Date.now() + (BANK[key].mins + EXTRA) * 60000;
+  ticker = setInterval(tick, 250); tick(); render();
+};
+
+function buildPaper(key){
+  const band = BANK[key];
+  const tier = n => shuffle(band.q.filter(q => q.d === n));
+  const [t1,t2,t3,t4] = band.take;
+  const opening = shuffle([...tier(1).slice(0,t1), ...tier(2).slice(0,t2)]);
+  return [...opening, ...tier(3).slice(0,t3), ...tier(4).slice(0,t4)];
+}
+
+function tick(){
+  const left = Math.max(0, endAt - Date.now()), s = Math.ceil(left/1000);
+  $("clock").textContent = String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+  $("clock").classList.toggle("low", s <= 60);
+  const a = $("alarm");
+  if(s <= 30){ a.style.display="block"; a.className="alarm hard";
+    a.textContent = "Half a minute left. Answer this one, then stop."; }
+  else if(s <= 60){ a.style.display="block"; a.className="alarm hard";
+    a.textContent = "One minute left."; }
+  else if(s <= 120){ a.style.display="block"; a.className="alarm soft";
+    a.textContent = "Two minutes left. Do not rush — unanswered questions simply score nothing."; }
+  if(left <= 0) finish(true);
+}
+
+/* ---------- 2 · quiz ---------- */
+function render(){
+  const q = paper[idx];
+  [...$("comb").children].forEach((c,i) => { c.className = "cell" + (i<idx?" done":i===idx?" now":""); });
+  $("qnum").textContent = "Question " + (idx+1) + " of " + paper.length +
+    (MARKS[q.d] > 1 ? " \u00b7 " + MARKS[q.d] + " marks" : "");
+  const opts = shuffle(q.t==="mcq" ? [...q.w] : [...q.o]), tags = ["A","B","C","D"];
+  const headTxt =
+      q.t==="mcq"   ? '<p class="prompt">Which spelling is correct?</p>'
+    : q.t==="pick"  ? '<p class="prompt">Only <b>one</b> of these words is spelt correctly. Which one?</p>'
+    : q.t==="wrong" ? '<p class="prompt">Three of these are spelt correctly. Which <b>one is wrong</b>?</p>'
+    : q.t==="form"  ? '<p class="prompt">Choose the correctly spelt form.</p><p class="sentence">'+esc(q.s)+'</p>'
+    : q.t==="err"   ? '<p class="prompt">One word is spelt wrongly. Which one?</p><p class="sentence">'+esc(q.s)+'</p>'
+    :                 '<p class="prompt">Which word correctly fills the blank?</p><p class="sentence">'+esc(q.s)+'</p>';
+  $("qbody").innerHTML = headTxt + '<div class="opts">' + opts.map((o,i) =>
+    '<button class="opt" data-v="'+esc(o)+'"><span class="tag">'+tags[i]+'</span>'+esc(o)+'</button>').join("") + '</div>';
+  [...$("qbody").querySelectorAll(".opt")].forEach(b => {
+    b.onclick = () => {
+      $("qbody").querySelectorAll(".opt").forEach(x => x.classList.remove("sel"));
+      b.classList.add("sel"); pick = b.dataset.v;
+      $("next").disabled = false; $("hint").textContent = "You cannot return to this question";
+    };
+  });
+  pick = null; $("next").disabled = true;
+  $("next").textContent = idx === paper.length-1 ? "Finish test" : "Next";
+  $("hint").textContent = "Choose one answer";
+}
+
+$("next").onclick = () => {
+  const q = paper[idx], right = (q.t === "mcq") ? q.w[0] : q.a;
+  if(pick === right) score += MARKS[q.d];
+  idx++;
+  idx < paper.length ? render() : finish(false);
+};
+
+/* ---------- 3 · save straight to the shared record ---------- */
+async function finish(ranOut){
+  clearInterval(ticker);
+  if(ranOut && pick !== null && idx < paper.length){
+    const q = paper[idx], right = (q.t === "mcq") ? q.w[0] : q.a;
+    if(pick === right) score += MARKS[q.d];
+    idx++;
+  }
+  const rec = { station:STATION, name:student.name, cls:student.cls, sec:student.sec,
+                roll:student.roll, band:student.band, score:score, total:total,
+                done:Math.min(idx, paper.length), outOf:paper.length, out:!!ranOut,
+                time:new Date().toLocaleString() };
+
+  hideAll(); $("done").style.display = "block";
+  $("again").disabled = true;
+  $("saveState").textContent = "Saving…";
+  $("recap").innerHTML = "<b>" + esc(rec.name) + "</b> &middot; Class " + esc(rec.cls + rec.sec) +
+    " &middot; Roll " + esc(rec.roll) +
+    (rec.out ? '<div class="flagline">The time ran out. You answered ' + rec.done + ' of ' +
+       rec.outOf + ' questions — everything you did answer has been counted.</div>' : "");
+
+  const res = await saveResult(rec);
+  $("again").disabled = false;
+  if(res.ok){
+    $("tick").textContent = "\u2713"; $("tick").className = "tick";
+    $("doneEyebrow").textContent = "Saved to the school record";
+    $("doneTitle").textContent = "Your paper is in the school record.";
+    $("saveState").textContent = "Recorded from " + STATION;
+  } else {
+    $("tick").textContent = "!"; $("tick").className = "tick fail";
+    $("doneEyebrow").textContent = "Saved on this computer only";
+    $("doneTitle").textContent = "Your paper is safe — please tell your teacher.";
+    $("doneNote").textContent =
+      "The shared record could not be reached. Your answers are stored on this computer and your " +
+      "teacher can copy them out. Do not sit the paper again.";
+    $("saveState").textContent = "Not yet in the shared record";
+  }
+}
+$("again").onclick = showEntry;
+
+/* ---------- 4 · teacher view ---------- */
+let ALL = [], TAB = null;
+
+$("teachBtn").onclick = openPin;
+function openPin(){ $("pinIn").value=""; $("pinMsg").textContent="";
+  $("pinBox").style.display="flex"; $("pinIn").focus(); }
+$("pinCancel").onclick = () => { $("pinBox").style.display="none"; };
+$("pinOk").onclick = tryPin;
+$("pinIn").onkeydown = e => { if(e.key === "Enter") tryPin(); };
+document.addEventListener("keydown", e => {
+  if(e.ctrlKey && e.shiftKey && (e.key === "T" || e.key === "t")){
+    e.preventDefault();
+    if($("teachBtn").style.display !== "none") openPin();
+  }
+});
+function tryPin(){
+  const entered = hash($("pinIn").value.trim() + "|" + SESSION);
+  if(!CONFIG || entered !== CONFIG.pin){
+    $("pinMsg").textContent = "That PIN is not correct."; $("pinIn").value=""; $("pinIn").focus(); return;
+  }
+  $("pinBox").style.display = "none";
+  hideAll(); $("sheet").style.display="block"; $("stage").classList.add("wide");
+  refresh(false); startAuto();
+}
+$("back").onclick = () => { stopAuto(); showEntry(); };
+$("reload").onclick = () => refresh(false);
+$("printBtn").onclick = () => window.print();
+$("topn").onchange = draw;
+
+let autoTimer = null, reading = false;
+
+async function refresh(silent){
+  if(reading) return;
+  reading = true;
+  $("sheetTitle").textContent = "Results — event " + SESSION;
+  if(!silent){
+    $("prog").style.display = "block"; $("prog").firstElementChild.style.width = "0%";
+    $("view").innerHTML = '<p class="sub" style="margin-top:16px">Reading the shared record…</p>';
+  }
+  ALL = await loadAll((d,t) => {
+    if(!silent) $("prog").firstElementChild.style.width = (t ? Math.round(100*d/t) : 100) + "%";
+  });
+  $("prog").style.display = "none";
+  reading = false;
+  draw();
+  $("scope").innerHTML = HAS_STORE
+    ? "Showing <b>every computer</b> using event code <b>" + esc(SESSION) +
+      "</b> — not just this one. Last read at " + new Date().toLocaleTimeString() +
+      ". This screen refreshes itself every 30 seconds."
+    : "The shared record is unavailable, so this shows only papers sat on this computer.";
+}
+
+function startAuto(){
+  stopAuto();
+  autoTimer = setInterval(() => {
+    if($("sheet").style.display !== "none") refresh(true); else stopAuto();
+  }, 30000);
+}
+function stopAuto(){ if(autoTimer){ clearInterval(autoTimer); autoTimer = null; } }
+
+/* a group is one class AND one section: 3A, 3B, 6C ... */
+const groupOf = r => String(r.cls) + (String(r.sec) === "-" ? "" : String(r.sec).toUpperCase());
+const groupsIn = () => [...new Set(ALL.map(groupOf))].sort((a,b) => {
+  const ca = parseInt(a)||0, cb = parseInt(b)||0;
+  return ca !== cb ? ca - cb : a.localeCompare(b);
+});
+const ofGroup = g => ALL.filter(r => groupOf(r) === g).sort((a,b) => b.score - a.score);
+
+function shortlist(){
+  const N = Math.max(2, parseInt($("topn").value) || 14), out = {};
+  ["Classes 3 to 5","Classes 6 to 8"].forEach(b => {
+    const list = ALL.filter(r => bandName(r.cls) === b).sort((x,y) => y.score - x.score);
+    let cut = Math.min(N, list.length);
+    if(list.length > N){ const m = list[N-1].score; while(cut < list.length && list[cut].score === m) cut++; }
+    out[b] = { list, cut };
+  });
+  return out;
+}
+
+function draw(){
+  const cs = groupsIn();
+  if(!ALL.length){
+    $("stats").innerHTML = ""; $("tabs").innerHTML = ""; $("alerts").innerHTML = "";
+    $("view").innerHTML = '<p class="sub" style="margin-top:16px">No papers recorded yet.</p>';
+    return;
+  }
+  if(!TAB || (TAB !== "SHORT" && !cs.includes(TAB))) TAB = cs[0];
+
+  $("tabs").innerHTML =
+    cs.map(c => '<button class="tab '+(TAB===c?"on":"")+'" data-t="'+c+'">Class '+esc(c)+'</button>').join("") +
+    '<button class="tab short '+(TAB==="SHORT"?"on":"")+'" data-t="SHORT">Shortlist by band</button>';
+  [...$("tabs").children].forEach(b => b.onclick = () => { TAB = b.dataset.t; draw(); });
+
+  const timedOut = ALL.filter(r => r.out).length;
+  const notShared = HAS_STORE ? 0 : ALL.length;
+  $("stats").innerHTML =
+    '<div>Papers recorded<b>'+ALL.length+'</b></div>' +
+    '<div>Class &amp; section groups<b>'+cs.length+'</b></div>' +
+    '<div>Computers<b>'+new Set(ALL.map(r=>r.station)).size+'</b></div>' +
+    '<div>Ran out of time<b>'+timedOut+'</b></div>';
+  $("alerts").innerHTML =
+    (timedOut ? '<div class="alarm hard" style="margin-top:14px">'+timedOut+
+      ' child(ren) ran out of time. Check the Attempted column before cutting anyone near the line.</div>' : "") +
+    (notShared ? '<div class="alarm soft" style="margin-top:14px">The shared record is unavailable, so ' +
+      'this shows only papers sat on this computer. Copy them out before closing.</div>' : "");
+
+  $("view").innerHTML = TAB === "SHORT" ? shortView() : groupView(TAB);
+  $("copymsg").textContent = "";
+}
+
+function groupView(g){
+  const list = ofGroup(g);
+  const machines = new Set(list.map(r => r.station)).size;
+  let h = '<h2>Class '+esc(g)+'</h2><p class="sub">'+list.length+' students · sat on '+machines+
+          ' different computer'+(machines===1?"":"s")+
+          ' · <b>all of them are in this one list</b> · ranked highest first</p>' +
+    '<table><tr><th>#</th><th>Name</th><th>Roll</th><th class="num">Score</th>' +
+    '<th>Attempted</th><th>Computer</th><th>Finished</th></tr>';
+  list.forEach((r,i) => {
+    h += '<tr class="'+(r.out?"flag":"")+'"><td>'+(i+1)+'</td><td>'+esc(r.name)+
+         '</td><td>'+esc(r.roll)+'</td><td class="num">'+r.score+' / '+r.total+'</td><td>'+
+         esc(r.done)+' / '+esc(r.outOf)+(r.out?' <span class="pill">time up</span>':"")+
+         '</td><td>'+esc(r.station)+'</td><td>'+esc(r.time)+'</td></tr>';
+  });
+  return h + '</table>';
+}
+
+function shortView(){
+  const S = shortlist(); let h = "";
+  Object.keys(S).forEach(b => {
+    const list = S[b].list, cut = S[b].cut;
+    h += '<h2 style="margin-top:16px">'+esc(b)+'</h2><p class="sub">'+list.length+
+         ' sat the paper · '+cut+' shortlisted</p>' +
+      '<table><tr><th>#</th><th>Name</th><th>Class</th><th>Roll</th><th class="num">Score</th><th>Attempted</th></tr>';
+    list.forEach((r,i) => {
+      h += '<tr class="'+(i<cut?"in ":"")+(r.out?"flag":"")+'"><td>'+(i<cut?i+1:"—")+'</td><td>'+
+           esc(r.name)+'</td><td>'+esc(r.cls+r.sec)+'</td><td>'+esc(r.roll)+
+           '</td><td class="num">'+r.score+' / '+r.total+'</td><td>'+esc(r.done)+' / '+esc(r.outOf)+
+           (r.out?' <span class="pill">time up</span>':"")+'</td></tr>';
+    });
+    h += '</table>';
+  });
+  return h;
+}
+
+/* ---------- copy for Excel ---------- */
+function sheetFor(g){
+  let t = ["Rank","Name","Class","Section","Roll","Score","Total","Attempted","OutOf","RanOutOfTime","Computer","Time"].join("\t")+"\n";
+  ofGroup(g).forEach((r,i) => {
+    t += [i+1,r.name,r.cls,r.sec,r.roll,r.score,r.total,r.done,r.outOf,(r.out?"YES":"no"),r.station,r.time].join("\t")+"\n";
+  });
+  return t;
+}
+const everything = () => groupsIn().map(g => "CLASS "+g+"\n"+sheetFor(g)).join("\n");
+
+function showExport(txt, label){
+  $("expTitle").textContent = "Copy into Excel — " + label;
+  $("expText").value = txt;
+  $("expMsg").textContent = "";
+  $("expBox").style.display = "flex";
+  const ta = $("expText");
+  ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length);
+}
+$("expClose").onclick = () => { $("expBox").style.display = "none"; };
+$("expCopy").onclick = () => {
+  const ta = $("expText");
+  ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length);
+  let ok = false;
+  try { ok = document.execCommand("copy"); } catch(e){ ok = false; }
+  if(ok){ $("expMsg").textContent = "Copied. If Excel pastes nothing, use Ctrl + A then Ctrl + C in the box above."; }
+  else if(navigator.clipboard){
+    navigator.clipboard.writeText(ta.value).then(
+      () => $("expMsg").textContent = "Copied — paste into Excel at cell A1.",
+      () => $("expMsg").textContent = "This browser blocked it. The text is selected — press Ctrl + C.");
+  } else {
+    $("expMsg").textContent = "This browser blocked it. The text is selected — press Ctrl + C.";
+  }
+};
+
+/* ---------- real .xlsx: one sheet per class, plus the two shortlists ---------- */
+const HEAD = ["Rank","Name","Class","Section","Roll","Score","Total",
+              "Attempted","Out of","Ran out of time","Computer","Finished"];
+
+function rowsFor(list, cut){
+  return list.map((r,i) => [
+    (cut === undefined || i < cut) ? i+1 : "",
+    r.name, r.cls, r.sec, r.roll, r.score, r.total,
+    r.done, r.outOf, r.out ? "YES" : "no", r.station, r.time
+  ]);
+}
+
+function buildWorkbook(){
+  const wb = XLSX.utils.book_new();
+  const widths = [{wch:6},{wch:26},{wch:7},{wch:8},{wch:7},{wch:8},{wch:8},
+                  {wch:10},{wch:8},{wch:15},{wch:11},{wch:20}];
+
+  groupsIn().forEach(g => {
+    const ws = XLSX.utils.aoa_to_sheet([HEAD, ...rowsFor(ofGroup(g))]);
+    ws["!cols"] = widths;
+    XLSX.utils.book_append_sheet(wb, ws, ("Class " + g).slice(0,31));
+  });
+
+  const S = shortlist();
+  Object.keys(S).forEach(b => {
+    const { list, cut } = S[b];
+    const aoa = [
+      ["Shortlist — " + b],
+      ["Top " + cut + " of " + list.length + " · anyone tied on the cut-off mark is included"],
+      [],
+      [...HEAD, "Shortlisted"]
+    ];
+    list.forEach((r,i) => aoa.push([...rowsFor([r])[0].slice(0,12), i < cut ? "YES" : ""]));
+    aoa[3][0] = "Rank";
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws["!cols"] = [...widths, {wch:12}];
+    XLSX.utils.book_append_sheet(wb, ws, b.replace("Classes ","Shortlist ").slice(0,31));
+  });
+
+  return wb;
+}
+
+$("xlsxBtn").onclick = () => {
+  if(!ALL.length) return;
+  if(window.__noXLSX || typeof XLSX === "undefined"){
+    $("copymsg").textContent =
+      "The spreadsheet library could not load — this needs an internet connection. " +
+      "Use Copy this sheet instead.";
+    return;
+  }
+  try{
+    const stamp = new Date().toISOString().slice(0,10);
+    XLSX.writeFile(buildWorkbook(), "Spelling-Bee-Results-" + SESSION + "-" + stamp + ".xlsx");
+    $("copymsg").textContent =
+      "Excel file saved — one sheet per class and section, plus the two shortlists. " +
+      "If nothing appeared, open this page in its own browser tab and try again, or use Copy this sheet.";
+  } catch(e){
+    $("copymsg").textContent =
+      "This browser blocked the download. Open the page in its own tab, or use Copy this sheet.";
+  }
+};
+
+$("xlsxOne").onclick = () => {
+  if(!ALL.length || TAB === "SHORT"){
+    $("copymsg").textContent = "Open a class tab first, then this saves that class on its own.";
+    return;
+  }
+  if(window.__noXLSX || typeof XLSX === "undefined"){
+    $("copymsg").textContent = "The spreadsheet library could not load — this needs an internet connection.";
+    return;
+  }
+  try{
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([HEAD, ...rowsFor(ofGroup(TAB))]);
+    ws["!cols"] = [{wch:6},{wch:26},{wch:7},{wch:8},{wch:7},{wch:8},{wch:8},
+                   {wch:10},{wch:8},{wch:15},{wch:11},{wch:20}];
+    XLSX.utils.book_append_sheet(wb, ws, ("Class " + TAB).slice(0,31));
+    XLSX.writeFile(wb, "Class " + TAB + ".xlsx");
+    $("copymsg").textContent = "Saved as \u201cClass " + TAB + ".xlsx\u201d — " +
+      ofGroup(TAB).length + " students, every computer pooled.";
+  } catch(e){
+    $("copymsg").textContent = "This browser blocked the download. Open the page in its own tab.";
+  }
+};
+
+$("copyOne").onclick = () => TAB === "SHORT"
+  ? showExport(everything(), "all classes")
+  : showExport(sheetFor(TAB), "Class " + TAB);
+</script>
+</body>
+</html>
