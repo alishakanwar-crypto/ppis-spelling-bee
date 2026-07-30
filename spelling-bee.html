@@ -989,6 +989,8 @@ function renderTyped(q){
   };
   box.onkeydown = e => { if(e.key === "Enter" && !$("next").disabled){ e.preventDefault(); $("next").click(); } };
   setTimeout(() => box.focus(), 30);
+  pick = null; $("next").disabled = true;
+  $("next").textContent = idx === paper.length-1 ? "Finish test" : "Next";
   $("hint").textContent = "Type your answer";
 }
 
