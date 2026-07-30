@@ -1162,7 +1162,7 @@ function draw(){
   [...$("tabs").children].forEach(b => b.onclick = () => { TAB = b.dataset.t; draw(); });
 
   const timedOut = ALL.filter(r => r.out).length;
-  const notShared = HAS_STORE ? 0 : ALL.length;
+  const notShared = (HAS_STORE || (HAS_CLOUD && CLOUD_LIVE) || DIR) ? 0 : ALL.length;
   $("stats").innerHTML =
     '<div>Papers recorded<b>'+ALL.length+'</b></div>' +
     '<div>Class &amp; section groups<b>'+cs.length+'</b></div>' +
