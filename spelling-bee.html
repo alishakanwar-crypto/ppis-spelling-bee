@@ -1013,7 +1013,7 @@ $("next").onclick = () => {
 /* ---------- 3 · save straight to the shared record ---------- */
 async function finish(ranOut){
   clearInterval(ticker);
-  if(ranOut && pick !== null && idx < paper.length){
+  if(ranOut && pick !== null && String(pick).trim() !== "" && idx < paper.length){
     const q = paper[idx];
     const right = (q.t === "type") ? null : ((q.t === "mcq") ? q.w[0] : q.a);
     if(q.t === "type" ? (norm(pick) === norm(q.a)) : (pick === right)) score += MARK;
