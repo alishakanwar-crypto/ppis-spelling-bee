@@ -132,6 +132,91 @@ unaffected (the stale text is scored against the typing answer and fails), but t
 Test submissions are real rows in the school's live sheet. Use obviously fake names/rolls, and list
 every row and every tab you created in the report so the user can delete them.
 
+**Always check whether the sheet is empty before you plan — it often is not.** A task may say "leave
+the sheet empty and ready", but by then real children may already have sat papers:
+```bash
+curl -sL "<exec>?action=list&session=BEE2026" | python3 -c "
+import json,sys
+rows=json.load(sys.stdin)['rows']
+print(len(rows),'rows')
+from collections import Counter
+print(Counter((r['cls'],r['sec']) for r in rows))"
+```
+If real rows exist, do **not** delete anything and do not write into a real class-section. Instead sit
+every test paper under a **throwaway section letter** (e.g. Section `Z`), which makes brand-new tabs
+(`Class 5Z`, `Class 8Z`) that can only contain your rows — then delete exactly those tabs
+(right-click tab → Delete → OK) and re-run the `list` query to prove the original row count is back
+and no `sec == "Z"` / test-station rows remain. Get the lead's approval before deleting anything.
+
+Saves can be slow: the completion screen can sit on **"Saving…"** for up to ~a minute before the green
+tick (Apps Script + LockService). That is not a failure — wait it out before declaring data loss, and
+re-query the API rather than trusting an immediate read.
+
+## 4b. Testing a question-data PR (papers changed, e.g. PR #8)
+
+When a PR only replaces `PAPERS[n].q`, the strongest possible evidence is **sitting the paper with
+every answer correct and getting exactly 25/25** — any wrong `a` / `w[0]` key makes that impossible.
+Do this manually for at least the classes the PR is really about; state clearly which classes were sat
+manually and which were only validated programmatically.
+
+First extract the key so a perfect score is achievable, then run a structural validator mirroring the
+page's own logic (`render()`: options are `q.w` for `t:"mcq"` else `q.o`; correct answer is `q.w[0]`
+for `mcq` else `q.a`; `type` compares through `norm()` = lowercase, strip non `a-z`):
+```bash
+python3 - <<'EOF'
+import re, json
+s = open('spelling-bee.html').read()
+# slice each PAPERS[n] block, convert the JS object literal to JSON, then assert per question:
+#   answer non-empty · exactly 4 options · no duplicate options · correct answer present in options
+EOF
+```
+Things this catches that a manual sitting cannot: duplicate options, an option list missing its own
+answer, and a question count / `mins` regression. Report both.
+
+Gotchas:
+- `buildPaper()` **shuffles within bands** (`b:1`, then `b:2`, then `b:3`), so the on-screen order is
+  not the data order. Never map "Q7" to the 7th entry in the source — match on the prompt text.
+- If the first question would be a `type`, the page swaps it with the first non-`type` question.
+- A US-English spellchecker will flag valid **British** spellings (`neighbour`, `favourite`,
+  `colourful`) and real-word distractors (`its`/`it's`, `affect`, `advise`, `calender`, `surprize`).
+  These are not defects — verify by hand before reporting a "misspelt answer".
+- Also review grade-appropriateness by hand: watch for a hard *grammar* item (e.g. "plural of
+  ANALYSIS" → `analyses`) sitting in band 1, which is meant to be the settling-in band.
+
+## 4c. Testing a `mins` / time-limit change (e.g. PR #10 set every class to 15 min)
+
+Two separate things must be checked, and the second is the one that actually matters to the user.
+
+**(a) Is the new limit applied everywhere?** The entry-screen band line is built from the data
+(`"Class "+c+" paper — "+PAPERS[+c].q.length+" questions, "+PAPERS[+c].mins+" minutes."`), so select
+**every** class 3–8 in the dropdown in turn and read the line. A half-applied change shows up as some
+classes keeping their old number. Then start one paper and confirm the first quiz frame shows the new
+value (`MM:SS`) — the band line and the actual `endAt` are computed in different places
+(`check()` vs `endAt = Date.now() + (PAPERS[cls].mins + EXTRA)*60000`).
+
+**(b) Is the new limit realistic?** Do not answer this from your own sitting — you know every answer
+in advance, so a fully-correct run takes ~3 minutes and proves nothing about a child. Instead, replay
+the proposed cap against the **real `secs` column already in the sheet**, which is free empirical data
+from children who sat under the old limits:
+```bash
+curl -sL "$EXEC_URL?action=list&session=BEE2026" | python3 -c "
+import json,sys,statistics as st
+rows=json.load(sys.stdin)['rows']; CAP=15*60
+for cls in range(3,9):
+    rs=[r for r in rows if r['cls']==cls and isinstance(r.get('secs'),(int,float)) and r['secs']>60]
+    if not rs: continue
+    cut=[r for r in rs if r['secs']>CAP]
+    print('Class %d: n=%d median %.1f min -> %d cut off (%.0f%%)'%(
+        cls,len(rs),st.median([r['secs'] for r in rs])/60,len(cut),100*len(cut)/len(rs)))"
+```
+Report this as a **finding, not a code failure** — the code does exactly what the PR says. The
+persuasive framing is a class whose *questions did not change* (Class 3 in PR #10): same paper, less
+time, so the cut-off percentage is attributable purely to the clock with no difficulty confounder.
+Filter out sub-60 s rows — they are staff smoke-tests, not children.
+
+Also surface it visually: the teacher view's "Time taken" column shows real durations per class and
+already renders a `TIME UP` pill, which makes a much better screenshot than a table of numbers.
+
 ## 5. Phone viewport testing on this box
 
 Chrome on Linux refuses to resize its window below ~532 px, and `--app=` mode did not spawn a
