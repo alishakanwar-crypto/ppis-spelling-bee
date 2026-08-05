@@ -498,8 +498,11 @@ async function cloudSave(rec){
 }
 
 async function cloudGet(params){
-  const q = new URLSearchParams(params).toString();
-  const res = await fetch(CLOUD_URL + (CLOUD_URL.indexOf("?") < 0 ? "?" : "&") + q);
+  const p = new URLSearchParams(params);
+  p.set("_", Date.now() + "." + Math.random().toString(36).slice(2));
+  const q = p.toString();
+  const res = await fetch(CLOUD_URL + (CLOUD_URL.indexOf("?") < 0 ? "?" : "&") + q,
+                          { cache: "no-store" });
   const out = await res.json();
   if(!out || !out.ok) throw new Error("sheet did not answer");
   return out;
