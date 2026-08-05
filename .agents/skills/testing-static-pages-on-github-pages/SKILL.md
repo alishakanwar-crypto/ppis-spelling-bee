@@ -107,7 +107,9 @@ this computer" on *every* teacher view, including successful sheet reads. Fixed 
 scope line above it: they must agree, and the banner must appear only in a genuine outage.
 
 ### Testing timer expiry without waiting 20-25 minutes
-The per-class time limit lives in `PAPERS[cls].mins` (Class 3/4 = 20, 5/6 = 22, 7 = 24, 8 = 25) and is
+The per-class time limit lives in `PAPERS[cls].mins` (these have changed repeatedly — 20/22/24/25 up to
+PR #8, then `15` for every class from PR #10 onward; read the current values rather than trusting this
+list) and is
 used at `endAt = Date.now() + (PAPERS[cls].mins + EXTRA) * 60000`. The setup screen's "Extra minutes"
 field **cannot shorten** it (`EXTRA = Math.max(0, Math.min(20, …))` — add only). So:
 ```bash
@@ -132,6 +134,120 @@ unaffected (the stale text is scored against the typing answer and fails), but t
 Test submissions are real rows in the school's live sheet. Use obviously fake names/rolls, and list
 every row and every tab you created in the report so the user can delete them.
 
+### Deleting rows from the shared sheet (there is no delete endpoint)
+The Apps Script exposes `action=list` and the POST write path only — **there is no delete action**, so
+any removal has to be done by hand in the Google Sheets UI. Because the backend writes **one tab per
+class-section** (`Class 5A`, `Class 5B`, …), clearing a whole class is usually "right-click the tab →
+Delete → OK" rather than row surgery. A tab is recreated automatically on the next submission for that
+class-section, so deleting the tab is safe and is the fastest correct move **when the tab holds only
+rows for the intended class-section** — open each tab and eyeball the Class/Section columns first,
+since tab names have been wrong before (a tab literally named `44B` turned out to hold a Class 4 row).
+
+Always bracket a destructive request with the API:
+```bash
+API="https://script.google.com/macros/s/<deployment>/exec?action=list&session=BEE2026"
+curl -sL "$API" > /tmp/before.json   # back this up; it is your only undo
+curl -sL "$API" | python3 -c "import json,sys;from collections import Counter;r=json.load(sys.stdin)['rows'];print(len(r));print(Counter((str(x['cls']),str(x['sec'])) for x in r))"
+```
+Report per-class-section counts and the before/after total, and explicitly re-verify that the classes
+you were told *not* to touch still have their original counts. Note the sheet is live during an event —
+the total can legitimately grow between two reads, so compare per-class counts, not just the total.
+
+**The `curl` path to the Apps Script endpoint is not guaranteed.** It has been observed to start
+returning Google's `Page Not Found` HTML (not JSON) mid-run, for several consecutive attempts, with
+and without a browser user-agent — while the *same* endpoint kept working perfectly from inside the
+page in Chrome. Treat this as a shell/automation-path block (UA sniffing or rate limiting), not an
+outage: verify the endpoint still works in the browser before reporting the backend as down. Have a
+UI fallback ready for any assertion you were going to prove with `curl` — the teacher view's
+*Papers recorded* / *Class & section groups* counters plus the Sheets tab strip are enough to prove a
+before/after cleanup, and are better evidence for a recording anyway. Sanity-check the JSON before
+parsing so you get a clear message instead of a `JSONDecodeError`:
+```bash
+head -c 1 out.json | grep -q '{' || echo "NOT JSON — endpoint blocked this client, use the UI"
+```
+
+### The teacher view's *Refresh* button can serve stale data (verify cleanup with a full reload)
+After deleting tabs in the Sheets UI, the teacher view kept reporting the **pre-deletion** paper count
+and still listed a deleted class-section group, through repeated clicks of the in-app **Refresh**
+button over ~3 minutes and past its own advertised 30-second auto-refresh. Its "Last read at HH:MM:SS"
+header updated on every click while the underlying numbers stayed wrong, which actively implies the
+data is fresh. A **full browser page reload (F5)** showed the true state immediately.
+
+So: never accept the in-app *Refresh* as proof that a sheet-side change did or did not land — reload
+the page, or read the spreadsheet directly. When the numbers disagree, the spreadsheet is the source
+of truth and the teacher view is the suspect. This is also worth reporting as a user-facing finding
+whenever a run touches the sheet: an invigilator watching the count climb, or a teacher who has just
+removed a mis-entered row, can be shown minutes-old numbers with no staleness indicator.
+
+**Important correction — it is probably NOT the browser HTTP cache.** The obvious diagnosis (repeated
+identical-URL reads went stale, an F5 cured it ⇒ Chrome cached the response) is tempting but was later
+contradicted by evidence. Checked in the Network panel, the Apps Script endpoint already returns
+`Cache-Control: no-cache, no-store, max-age=0, must-revalidate` on **both** hops — the
+`exec?action=list…` 302 *and* the `echo?user_content_key=…` 200 that actually carries the JSON. A
+response the server marks `no-store` cannot sit in Chrome's HTTP cache. More likely culprits are
+Google-side propagation lag or an edge/server cache, in which case the ~3 minutes was a TTL lapsing
+and the F5 merely coincided with it.
+
+Consequences for testing any "fix the stale teacher view" PR:
+- **Check the response headers before accepting a caching diagnosis.** One look at `Cache-Control` in
+  the Network panel can invalidate a whole PR's rationale.
+- The staleness is **intermittent** — it has failed to reproduce on demand across a later full run
+  (three delete/restore/delete flips, both builds correct every time). Budget for the possibility that
+  you simply cannot trigger it, and say so rather than declaring the fix proven.
+- Remember the request is a **two-hop redirect**; inspect the `echo?user_content_key=…` response, not
+  just the `exec` 302, when reasoning about caching or payloads.
+
+### Proving a fix actually changes behaviour: run the pre-fix build side by side
+When a PR claims to fix an intermittent bug, "the new build worked this time" is worthless on its own.
+Serve the **parent commit** locally and run it next to the live fixed build, against the *same* events:
+```bash
+git show <parent-sha>:spelling-bee.html > /tmp/bee-old/spelling-bee.html
+cd /tmp/bee-old && python3 -m http.server 8899   # http://localhost:8899/spelling-bee.html
+```
+Verify first that both builds embed the **same** `AKfycb…` deployment id (`grep -o 'AKfycb[A-Za-z0-9_-]*'`)
+so they read the same sheet. Chrome partitions HTTP cache by top-level site, so `localhost` and
+`github.io` cannot contaminate each other — which is what makes the comparison valid. Open both teacher
+views, never reload either, and drive several state flips (delete a tab → `Ctrl+Z` to restore it →
+delete again) checking both after each. Sheets' own undo makes extra flips essentially free, and a
+caching bug has to survive several to be called fixed.
+
+**If the control also passes, the test proved nothing** — report that plainly instead of presenting the
+new build's clean run as a win. Pair it with a *mechanism* check (below), which is often the only solid
+evidence available for an unreproducible bug.
+
+For a cache-busting fix specifically, the mechanism check is: open the Network panel, click Refresh
+twice, and compare request URLs — fixed build shows a unique `&_=…` per read, the old build repeats one
+fixed URL. That at least proves the code is live and doing what it claims.
+
+### Testing a subset-selection change (`ask: N` out of a larger bank)
+When a PR starts asking only N of the M written questions, the failure mode that matters is **fairness**:
+every child in a class must get the *same* N. Read the order of operations in `buildPaper()` — slice
+first then `shuffle` means the set is fixed and only the order varies (correct); `shuffle` before the
+slice would give every child a different paper (the bug). Prove it at runtime, not just by reading code:
+sit/step through the same class paper **three times across two browser profiles** (use an incognito
+window for a genuinely fresh `localStorage`), record all N prompts in order each time, then diff:
+```python
+print('SETS IDENTICAL:', set(o1)==set(o2)==set(o3))
+print('orders differ:', o1!=o2, o1!=o3, o2!=o3)
+```
+Also assert the **band spread survived the cut** (map each prompt to its `b:1/2/3` band and check the
+counts and that they are still presented easy→hard) — a proportional split can silently collapse onto
+one band. For runs you only want to *observe*, step to the last question and **reload instead of
+submitting** so no row is written to the live sheet.
+
+Two traps worth pre-computing in Node against the real `PAPERS` before touching the UI: which class is
+the only one whose asked slice can trigger a given edge case (e.g. only Class 5's asked band 1 contains
+a `type` item, so it is the only class that can exercise the "never open on a blank typing box" swap),
+and **which previously-flagged words the cut silently dropped** — PR #12's rules text still advertises
+`manoeuvre` and `favourite` as examples even though both fell outside the asked 18.
+
+Be honest about probabilistic evidence: observing four starts that did not open on a typing box shows
+no run opened badly, but it does **not** prove the swap code fired.
+
+Scoring shape to assert after an `ask` change: `total = paper.length` and `outOf: paper.length`, so the
+sheet's *Score / Out of / Answered / Questions* columns must all read N. Pre-existing rows still reading
+the old M make a regression obvious side by side.
+
 ## 5. Phone viewport testing on this box
 
 Chrome on Linux refuses to resize its window below ~532 px, and `--app=` mode did not spawn a
@@ -148,6 +264,37 @@ Two Chrome windows plus DevTools plus device emulation are easy to leave behind.
 turn off device mode, close DevTools, and close extra/incognito windows so the shared browser is
 usable by others.
 
+**But do not close the last Chrome window.** If a previous session closed every window, the browser is
+gone and `google-chrome` on `PATH` will not bring it back — `~/.local/bin/google-chrome` is only a
+thin wrapper that POSTs the URL to the harness CDP endpoint on `localhost:29229`:
+```sh
+url=$(echo "$1" | /usr/bin/jq -rR @uri); curl -XPUT -fsSo /dev/null "http://localhost:29229/json/new?$url"
+```
+With nothing listening there it fails silently. Relaunch the real binary yourself, keeping the same
+debugging port so tooling can attach:
+```bash
+setsid nohup /opt/.devin/playwright_browsers/chromium-1097/chrome-linux/chrome \
+  --remote-debugging-port=29229 --remote-allow-origins='*' --no-first-run \
+  --no-default-browser-check --user-data-dir=/home/ubuntu/.chrome-testing \
+  "<url>" >/tmp/chrome.log 2>&1 </dev/null &
+sleep 10; wmctrl -r "Spelling Bee" -b add,maximized_vert,maximized_horz
+```
+Caveats learned the hard way:
+- A **fresh `--user-data-dir` is not signed in to Google**, so the Sheets UI will demand a login even
+  though the Spelling Bee page itself needs none. Budget for this before planning any tab deletion.
+- The `browser_console` / `read_dom` tools may still report *"Could not connect to Chrome via CDP"*
+  against a manually launched browser. Screenshots and clicks keep working; plan any evidence that
+  needs JS (e.g. `performance.getEntriesByType('resource')` to count cache hits) around that, or get
+  the same facts from the DevTools **Network** panel by hand.
+
 ## Devin Secrets Needed
 
-None. The page is public and requires no login; the Teacher PIN is the in-page default `2026`.
+The Spelling Bee page itself is public and needs no login; the Teacher PIN is the in-page default
+`2026`. A login is only required for the **Google Sheets UI**, which you need whenever a test must
+delete a tab (there is no delete endpoint).
+
+- `ALISHA_GOOGLE_PASSWORD_CURRENT` — worked for `alisha.kanwar@ppischool.in`. No 2FA prompt appeared.
+- `GOOGLE_PASSWORD_ALISHA_KANWAR_PPISCHOOL` was **rejected** ("your password was changed 4 months
+  ago"), despite its description claiming to be the updated one. Several similarly-named secrets exist
+  and most are stale — try `…_CURRENT` first and avoid burning attempts, since repeated failures risk
+  locking the account.
