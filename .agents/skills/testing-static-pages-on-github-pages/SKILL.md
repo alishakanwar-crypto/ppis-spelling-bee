@@ -107,7 +107,9 @@ this computer" on *every* teacher view, including successful sheet reads. Fixed 
 scope line above it: they must agree, and the banner must appear only in a genuine outage.
 
 ### Testing timer expiry without waiting 20-25 minutes
-The per-class time limit lives in `PAPERS[cls].mins` (Class 3/4 = 20, 5/6 = 22, 7 = 24, 8 = 25) and is
+The per-class time limit lives in `PAPERS[cls].mins` (these have changed repeatedly — 20/22/24/25 up to
+PR #8, then `15` for every class from PR #10 onward; read the current values rather than trusting this
+list) and is
 used at `endAt = Date.now() + (PAPERS[cls].mins + EXTRA) * 60000`. The setup screen's "Extra minutes"
 field **cannot shorten** it (`EXTRA = Math.max(0, Math.min(20, …))` — add only). So:
 ```bash
@@ -131,6 +133,54 @@ unaffected (the stale text is scored against the typing answer and fails), but t
 ### Housekeeping for the shared spreadsheet
 Test submissions are real rows in the school's live sheet. Use obviously fake names/rolls, and list
 every row and every tab you created in the report so the user can delete them.
+
+### Deleting rows from the shared sheet (there is no delete endpoint)
+The Apps Script exposes `action=list` and the POST write path only — **there is no delete action**, so
+any removal has to be done by hand in the Google Sheets UI. Because the backend writes **one tab per
+class-section** (`Class 5A`, `Class 5B`, …), clearing a whole class is usually "right-click the tab →
+Delete → OK" rather than row surgery. A tab is recreated automatically on the next submission for that
+class-section, so deleting the tab is safe and is the fastest correct move **when the tab holds only
+rows for the intended class-section** — open each tab and eyeball the Class/Section columns first,
+since tab names have been wrong before (a tab literally named `44B` turned out to hold a Class 4 row).
+
+Always bracket a destructive request with the API:
+```bash
+API="https://script.google.com/macros/s/<deployment>/exec?action=list&session=BEE2026"
+curl -sL "$API" > /tmp/before.json   # back this up; it is your only undo
+curl -sL "$API" | python3 -c "import json,sys;from collections import Counter;r=json.load(sys.stdin)['rows'];print(len(r));print(Counter((str(x['cls']),str(x['sec'])) for x in r))"
+```
+Report per-class-section counts and the before/after total, and explicitly re-verify that the classes
+you were told *not* to touch still have their original counts. Note the sheet is live during an event —
+the total can legitimately grow between two reads, so compare per-class counts, not just the total.
+
+### Testing a subset-selection change (`ask: N` out of a larger bank)
+When a PR starts asking only N of the M written questions, the failure mode that matters is **fairness**:
+every child in a class must get the *same* N. Read the order of operations in `buildPaper()` — slice
+first then `shuffle` means the set is fixed and only the order varies (correct); `shuffle` before the
+slice would give every child a different paper (the bug). Prove it at runtime, not just by reading code:
+sit/step through the same class paper **three times across two browser profiles** (use an incognito
+window for a genuinely fresh `localStorage`), record all N prompts in order each time, then diff:
+```python
+print('SETS IDENTICAL:', set(o1)==set(o2)==set(o3))
+print('orders differ:', o1!=o2, o1!=o3, o2!=o3)
+```
+Also assert the **band spread survived the cut** (map each prompt to its `b:1/2/3` band and check the
+counts and that they are still presented easy→hard) — a proportional split can silently collapse onto
+one band. For runs you only want to *observe*, step to the last question and **reload instead of
+submitting** so no row is written to the live sheet.
+
+Two traps worth pre-computing in Node against the real `PAPERS` before touching the UI: which class is
+the only one whose asked slice can trigger a given edge case (e.g. only Class 5's asked band 1 contains
+a `type` item, so it is the only class that can exercise the "never open on a blank typing box" swap),
+and **which previously-flagged words the cut silently dropped** — PR #12's rules text still advertises
+`manoeuvre` and `favourite` as examples even though both fell outside the asked 18.
+
+Be honest about probabilistic evidence: observing four starts that did not open on a typing box shows
+no run opened badly, but it does **not** prove the swap code fired.
+
+Scoring shape to assert after an `ask` change: `total = paper.length` and `outOf: paper.length`, so the
+sheet's *Score / Out of / Answered / Questions* columns must all read N. Pre-existing rows still reading
+the old M make a regression obvious side by side.
 
 ## 5. Phone viewport testing on this box
 
