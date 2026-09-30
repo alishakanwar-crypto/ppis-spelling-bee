@@ -360,11 +360,14 @@ With nothing listening there it fails silently. Relaunch the real binary yoursel
 debugging port so tooling can attach:
 ```bash
 setsid nohup /opt/.devin/playwright_browsers/chromium-1097/chrome-linux/chrome \
-  --remote-debugging-port=29229 --remote-allow-origins='*' --no-first-run \
+  --remote-debugging-address=127.0.0.1 --remote-debugging-port=29229 --no-first-run \
   --no-default-browser-check --user-data-dir=/home/ubuntu/.chrome-testing \
   "<url>" >/tmp/chrome.log 2>&1 </dev/null &
 sleep 10; wmctrl -r "Spelling Bee" -b add,maximized_vert,maximized_horz
 ```
+Do not add `--remote-allow-origins='*'`: it lets any web page open in that browser drive it over the
+debugging port, and the same browser is later signed in to the school Sheet. Playwright's
+`connect_over_cdp` does not need it. Close this browser when the test is done.
 Caveats learned the hard way:
 - A **fresh `--user-data-dir` is not signed in to Google**, so the Sheets UI will demand a login even
   though the Spelling Bee page itself needs none. Budget for this before planning any tab deletion.
@@ -379,8 +382,6 @@ The Spelling Bee page itself is public and needs no login; the Teacher PIN is th
 `2026`. A login is only required for the **Google Sheets UI**, which you need whenever a test must
 delete a tab (there is no delete endpoint).
 
-- `ALISHA_GOOGLE_PASSWORD_CURRENT` — worked for `alisha.kanwar@ppischool.in`. No 2FA prompt appeared.
-- `GOOGLE_PASSWORD_ALISHA_KANWAR_PPISCHOOL` was **rejected** ("your password was changed 4 months
-  ago"), despite its description claiming to be the updated one. Several similarly-named secrets exist
-  and most are stale — try `…_CURRENT` first and avoid burning attempts, since repeated failures risk
-  locking the account.
+- The school Google account password, from the session's secrets. Several similarly-named password
+  secrets exist and some are stale; check each secret's description, and stop after one failed
+  attempt and ask the user, since repeated failures risk locking the account.
