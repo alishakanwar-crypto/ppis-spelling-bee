@@ -367,7 +367,8 @@ sleep 10; wmctrl -r "Spelling Bee" -b add,maximized_vert,maximized_horz
 ```
 Do not add `--remote-allow-origins='*'`: it lets any web page open in that browser drive it over the
 debugging port, and the same browser is later signed in to the school Sheet. Playwright's
-`connect_over_cdp` does not need it. Close this browser when the test is done.
+`connect_over_cdp` does not need it. Leave this browser running when the test is done: if it is the
+only Chrome window, closing it leaves nothing on port 29229 and the wrapper above fails again.
 Caveats learned the hard way:
 - A **fresh `--user-data-dir` is not signed in to Google**, so the Sheets UI will demand a login even
   though the Spelling Bee page itself needs none. Budget for this before planning any tab deletion.
