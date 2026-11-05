@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Question Paper Maker — PP International School</title>
+<meta name="description" content="Type or paste a question paper, check it for errors, and print it as a PDF on the school letterhead.">
+<meta name="theme-color" content="#C8202E">
+<style>
+  :root{--ink:#16233A;--soft:#4A5871;--paper:#F6F7FA;--rule:#D9DFE9;--red:#C8202E;
+        --wash:#FDECEE;--good:#1E7A4B;--goodwash:#EAF6EF;--warn:#8A5A00;--warnwash:#FDF4E3}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI",Roboto,-apple-system,Helvetica,Arial,sans-serif;background:var(--paper);
+       color:var(--ink);line-height:1.5;padding:20px}
+  .wrap{max-width:1200px;margin:0 auto}
+  .top{display:flex;align-items:center;gap:14px;margin-bottom:4px}
+  .top img{height:34px}
+  h1{font-family:Georgia,serif;font-size:26px;font-weight:400}
+  .sub{color:var(--soft);font-size:14px;margin-bottom:18px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  @media (max-width:1000px){.cols{grid-template-columns:1fr}}
+  .card{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:18px}
+  h2{font-family:Georgia,serif;font-size:17px;font-weight:400;margin-bottom:12px}
+  label{display:block;font-size:12px;font-weight:600;color:var(--soft);margin-bottom:4px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row>.f{flex:1;min-width:120px}
+  .f{margin-bottom:12px}
+  input,select,textarea{width:100%;padding:9px 11px;font-size:14px;font-family:inherit;border:1px solid var(--rule);
+       border-radius:4px;background:#fff;color:var(--ink)}
+  textarea{font-family:"Courier New",monospace;font-size:13px;line-height:1.6;min-height:340px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--red);outline-offset:1px;border-color:var(--red)}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:4px;font-weight:600}
+  .btn{background:var(--ink);color:#fff;padding:11px 22px;font-size:14px}
+  .btn:hover{background:#0D1727}
+  .btn-red{background:var(--red)} .btn-red:hover{background:#A5101C}
+  .btn-ghost{background:#fff;color:var(--soft);border:1px solid var(--rule);padding:9px 16px;font-size:13px}
+  .btn-ghost:hover{border-color:var(--soft);color:var(--ink)}
+  .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+  .hint{font-size:12px;color:var(--soft);margin-top:8px}
+  .hint code{background:#EEF1F6;padding:1px 4px;border-radius:3px;font-size:12px}
+  .issues{margin-top:14px;display:flex;flex-direction:column;gap:6px;max-height:320px;overflow:auto}
+  .iss{border:1px solid var(--rule);border-left-width:4px;border-radius:4px;padding:8px 10px;font-size:13px;background:#fff}
+  .iss.err{border-left-color:var(--red);background:var(--wash)}
+  .iss.warn{border-left-color:#E0A81E;background:var(--warnwash)}
+  .iss .where{font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--soft)}
+  .iss .fixable{float:right;font-size:11px;color:var(--good);font-weight:700}
+  .ok{border:1px solid #BEE3CE;background:var(--goodwash);color:var(--good);padding:10px 12px;
+      border-radius:4px;font-size:13px;font-weight:600;margin-top:14px}
+  .count{font-size:12px;color:var(--soft);margin-top:10px}
+  .chk{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--soft);margin-bottom:8px}
+  .chk input{width:auto}
+
+  /* ---------- the printable worksheet: laid out like the school's own ---------- */
+  .scale{overflow:auto}
+  .sheet{background:#fff;width:210mm;min-height:297mm;padding:9mm;margin:0 auto;
+         box-shadow:0 1px 6px rgba(22,35,58,.14);color:#000}
+  .page{border:1px solid #000;padding:6mm 5mm;min-height:279mm;
+        font-family:Calibri,Carlito,"Segoe UI",Arial,sans-serif;font-size:11.5pt;line-height:1.34}
+  .sheet.hi .page{font-family:"Nirmala UI","Noto Sans Devanagari",Mangal,Calibri,Arial,sans-serif;font-size:12.5pt}
+  .frame{display:none}
+  .head{position:relative;text-align:center;min-height:19mm;padding-top:3mm}
+  .head img{position:absolute;left:0;top:1mm;height:10mm}
+  .head .tl{font-weight:bold;text-decoration:underline}
+  .durline{display:flex;justify-content:space-between;font-weight:bold}
+  .gi b{display:block;font-weight:bold}
+  .nmline{display:flex;justify-content:space-between;font-weight:bold;margin:3mm 0 2mm}
+  .u{display:inline-block;border-bottom:1px solid #000;min-width:36mm}
+  .u.s{min-width:14mm}
+  .rule{border:0;border-top:1.4pt solid #000;margin:0 0 2.5mm}
+  .sec{text-align:center;font-weight:bold;text-decoration:underline;margin:3.5mm 0 1.5mm}
+  .qline,.partline,.subline{display:flex;gap:2mm;font-weight:bold;page-break-inside:avoid}
+  .qline{margin-top:2mm}
+  .partline{margin:1.5mm 0 0 5mm}
+  .subline{margin:1.5mm 0 0 8mm}
+  /* a sentence the child completes is printed plain, as on the school's own paper */
+  .partline.reg,.subline.reg{font-weight:normal}
+  .partline.reg .m,.subline.reg .m{font-weight:bold}
+  .qline .n,.partline .n,.subline .n{white-space:nowrap}
+  .qline .t,.partline .t,.subline .t{flex:1}
+  .m{white-space:nowrap;text-align:right;font-weight:bold;padding-left:3mm}
+  .opts{display:flex;margin:1mm 0 0 12mm;font-weight:normal}
+  .opts span{flex:1;padding-right:3mm}
+  .para{margin:1mm 0 0 2mm;text-align:justify}
+  .box{margin:2mm 0 2mm 12mm;width:44mm;border-collapse:collapse}
+  .box td{border:1px solid #000;padding:1mm;text-align:center}
+  table.match{border-collapse:collapse;margin:2mm 0 2mm 16mm}
+  table.match td{border:1px solid #000;padding:.5mm 5mm;text-align:center}
+  table.match td.lbl{padding:.5mm 2mm}
+  table.match tr.h td{font-weight:bold}
+  .ansline{border-bottom:1px solid #000;height:8mm;margin:0 2mm}
+  .blank{display:inline-block;border-bottom:1px solid #000;min-width:24mm}
+
+  @media print{
+    html,body{background:#fff;padding:0;margin:0;width:auto}
+    .noprint{display:none !important}
+    .scale{overflow:visible}
+    .sheet{width:auto;min-height:0;box-shadow:none;margin:0;padding:0}
+    /* the frame is drawn at the page edge, so the text keeps clear of it */
+    .page{border:0;padding:3mm 6mm 0;min-height:0}
+    /* fixed, so the border is drawn round every printed page and not just the first */
+    .frame{display:block;position:fixed;top:0;left:0;right:0;bottom:0;border:1px solid #000}
+    @page{size:A4;margin:9mm 8mm}
+  }
+</style>
+</head>
+<body>
+<div class="wrap noprint">
+  <div class="top"><img src="ppis-logo.png" alt="PP International School"><h1>Question Paper Maker</h1></div>
+  <p class="sub">Type or paste the paper, press <b>Check for errors</b>, then <b>Save as PDF</b>. Everything stays on this
+     computer — nothing is uploaded.</p>
+
+  <div class="cols">
+    <div class="card">
+      <h2>1 &nbsp;Paper details</h2>
+      <div class="row">
+        <div class="f"><label>Language of the paper</label>
+          <select id="lang"><option value="en">English</option><option value="hi">हिंदी (Hindi)</option></select></div>
+        <div class="f"><label>Academic session</label><input id="session" value="2026-27"></div>
+      </div>
+      <div class="row">
+        <div class="f"><label>Title (worksheet / test)</label><input id="title" value="APPRAISAL WORKSHEET-2"></div>
+        <div class="f"><label>Grade</label><input id="grade" placeholder="II" value="II"></div>
+      </div>
+      <div class="row">
+        <div class="f"><label>Subject</label><input id="subject" value="ENGLISH"></div>
+        <div class="f"><label>Duration</label><input id="duration" value="40 Minutes"></div>
+        <div class="f"><label>Maximum marks</label><input id="max" value="20"></div>
+      </div>
+      <div class="f"><label>General instructions (one per line, numbered automatically)</label>
+        <textarea id="instr" style="min-height:72px">Read the worksheet carefully.
+Write the answers in the space provided.</textarea></div>
+      <div class="chk"><input type="checkbox" id="showNames" checked><label for="showNames" style="margin:0">Print the Name / Section line</label></div>
+
+      <h2 style="margin-top:20px">2 &nbsp;Questions</h2>
+      <textarea id="body" spellcheck="true"></textarea>
+      <p class="hint">How to type it — exactly as the paper reads:<br>
+        <code>SECTION - A (READING)</code> a section heading · <code>Q1.</code> a question ·
+        <code>A.</code> a lettered part · <code>a.</code> a sub-part ·
+        <code>i. one&nbsp;&nbsp;ii. two&nbsp;&nbsp;iii. three</code> options on one line ·
+        marks at the end of the line: <code>(1)</code>, <code>(3x1=3)</code>, <code>(4x0.5=2)</code> or <code>[2]</code><br>
+        <code>BOX: baskets | shopkeeper | money</code> a help box ·
+        <code>MATCH: MASCULINE | FEMININE</code> then <code>uncle | niece</code> on each following line ·
+        <code>LINES: 4</code> four ruled answer lines · <code>____</code> a blank to fill · a blank line leaves a gap.</p>
+      <div class="bar">
+        <button class="btn btn-ghost" id="sample">Load a sample paper</button>
+        <button class="btn btn-ghost" id="clear">Clear</button>
+        <span class="count" id="count"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3 &nbsp;Check &amp; print</h2>
+      <div class="bar" style="margin-top:0">
+        <button class="btn" id="check">Check for errors</button>
+        <button class="btn btn-ghost" id="fix">Fix the mechanical ones</button>
+        <button class="btn btn-red" id="print">Save as PDF</button>
+      </div>
+      <div class="chk" style="margin-top:12px" id="britishRow"><input type="checkbox" id="british" checked>
+        <label for="british" style="margin:0">Flag American spellings (colour, practise, organise …)</label></div>
+      <div id="report"></div>
+      <p class="hint"><b>Save as PDF:</b> the print window opens — choose <i>Destination: Save as PDF</i>, paper size A4,
+        and switch <i>Headers and footers</i> off. To print copies for the class, choose the printer instead.</p>
+      <p class="hint">The checker catches mechanical and structural mistakes — spacing, punctuation, numbering, marks
+        that do not add up, repeated questions, common misspellings. It is not a substitute for reading the paper: it
+        cannot tell you that an answer is wrong or a question is unfair.</p>
+    </div>
+  </div>
+
+  <h2 style="margin:22px 0 10px">4 &nbsp;Preview</h2>
+</div>
+
+<div class="scale"><div class="sheet" id="sheet"></div></div>
+
+<script>
+/* ------------------------------------------------------------------ storage */
+var KEY = 'ppis-paper-maker-v2';
+var FIELDS = ['lang','session','title','grade','subject','duration','max','instr','body'];
+var CHECKS = ['showNames','british'];
+
+/* every fixed word the printed paper uses, in both languages */
+var WORDS = {
+  en:{ session:'ACADEMIC SESSION', grade:'GRADE', subject:'SUBJECT', duration:'Duration',
+       max:'Maximum Marks', instr:'General Instructions', name:'Name', section:'Section', q:'Q' },
+  hi:{ session:'शैक्षणिक सत्र', grade:'कक्षा', subject:'विषय', duration:'समय',
+       max:'अधिकतम अंक', instr:'सामान्य निर्देश', name:'नाम', section:'वर्ग', q:'प्र' }
+};
+function hindi(){ return el('lang').value === 'hi'; }
+function w(k){ return WORDS[hindi() ? 'hi' : 'en'][k]; }
+
+function el(id){ return document.getElementById(id); }
+
+function save(){
+  var d = {};
+  FIELDS.forEach(function(f){ d[f] = el(f).value; });
+  CHECKS.forEach(function(f){ d[f] = el(f).checked; });
+  try { localStorage.setItem(KEY, JSON.stringify(d)); } catch(e){}
+}
+function load(){
+  var raw = null;
+  try { raw = localStorage.getItem(KEY); } catch(e){}
+  if(!raw) return false;
+  var d;
+  try { d = JSON.parse(raw); } catch(e){ return false; }
+  FIELDS.forEach(function(f){ if(typeof d[f] === 'string') el(f).value = d[f]; });
+  CHECKS.forEach(function(f){ if(typeof d[f] === 'boolean') el(f).checked = d[f]; });
+  return true;
+}
+
+/* ------------------------------------------------------------------ parsing */
+/* \b does not work after Devanagari, so the Hindi words carry no word boundary */
+var SEC_RE   = /^\s*(?:(?:section|part)\b|\u0916\u0902\u0921|\u092d\u093e\u0917)/i;
+var NUM_RE   = /^\s*(?:Q|\u092a\u094d\u0930(?:\u0936\u094d\u0928)?)?\s*\.?\s*(\d+)\s*[.)]\s*(.*)$/i;
+var PART_RE  = /^\s*\(?([A-Z])\)?\s*[.)]\s+(.*)$/;
+var SUB_RE   = /^\s*\(?([a-z]|[\u0915-\u0939])\)?\s*[.)]\s+(.*)$/;
+var ROMAN    = '(?:i{1,3}|iv|v|vi{1,3}|vi|ix|x)';
+var OPT_ONE  = new RegExp('(?:^|\\s)\\(?' + ROMAN + '\\)?[.)]\\s', 'gi');
+var OPT_RE   = new RegExp('^\\(?' + ROMAN + '\\)?[.)]\\s', 'i');
+var BOX_RE   = /^\s*BOX\s*:\s*(.+)$/i;
+var MATCH_RE = /^\s*MATCH\s*:\s*(.+)$/i;
+var LINES_RE = /^\s*LINES\s*:?\s*(\d+)\s*$/i;
+/* (1) · (3x1=3) · (4x0.5=2) · [2] · (2 marks) */
+var MARK_RE  = /[\[(]\s*(\d+(?:\.\d+)?(?:\s*[x\u00d7*]\s*\d+(?:\.\d+)?)?(?:\s*=\s*\d+(?:\.\d+)?)?)\s*(?:marks?|m|\u0905\u0902\u0915)?\s*[\])]\s*$/i;
+
+function markValue(s){
+  var eq = s.split('=');
+  if(eq.length > 1) return parseFloat(eq[1]);
+  var mul = s.split(/[x\u00d7*]/i);
+  if(mul.length > 1) return mul.reduce(function(a,p){ return a * parseFloat(p); }, 1);
+  return parseFloat(s);
+}
+
+function splitMarks(text){
+  var m = text.match(MARK_RE);
+  if(!m) return { text: text.trim(), marks: null, shown: null };
+  return { text: text.slice(0, m.index).trim(), marks: markValue(m[1]),
+           shown: '(' + m[1].replace(/\s+/g,'') + ')' };
+}
+
+function isOptionRow(t){
+  if(!OPT_RE.test(t)) return false;
+  OPT_ONE.lastIndex = 0;
+  var n = 0;
+  while(OPT_ONE.exec(t)) n++;
+  return n >= 2;
+}
+function splitOptions(t){
+  var out = [], last = 0;
+  OPT_ONE.lastIndex = 0;
+  var m;
+  while((m = OPT_ONE.exec(t)) !== null){
+    var at = m.index + (/^\s/.test(m[0]) ? 1 : 0);
+    if(at > last) out.push(t.slice(last, at).trim());
+    last = at;
+    OPT_ONE.lastIndex = m.index + m[0].length;
+  }
+  out.push(t.slice(last).trim());
+  return out.filter(function(x){ return x; });
+}
+function cells(s){ return s.split('|').map(function(c){ return c.trim(); }); }
+
+function parse(src){
+  var out = [];
+  var lines = src.split(/\r?\n/);
+  for(var i = 0; i < lines.length; i++){
+    var raw = lines[i], t = raw.trim();
+    if(!t){ out.push({ kind:'blank', line:i+1, raw:raw }); continue; }
+
+    var mt = t.match(MATCH_RE);
+    if(mt){
+      var rows = [], at = i + 1;
+      while(i + 1 < lines.length && lines[i+1].trim() && lines[i+1].indexOf('|') > -1){
+        i++; rows.push(cells(lines[i].trim()));
+      }
+      out.push({ kind:'match', head:cells(mt[1]), rows:rows, text:t, marks:null, line:at, raw:raw });
+      continue;
+    }
+    var bx = t.match(BOX_RE);
+    if(bx){ out.push({ kind:'box', cells:cells(bx[1]), text:t, marks:null, line:i+1, raw:raw }); continue; }
+    var ln = t.match(LINES_RE);
+    if(ln){ out.push({ kind:'lines', n:parseInt(ln[1],10), text:t, marks:null, line:i+1, raw:raw }); continue; }
+    if(SEC_RE.test(t)){ out.push({ kind:'section', text:t, marks:null, line:i+1, raw:raw }); continue; }
+
+    if(isOptionRow(t)){
+      var so = splitMarks(t);
+      out.push({ kind:'opts', opts:splitOptions(so.text), text:so.text, marks:so.marks,
+                 shown:so.shown, line:i+1, raw:raw });
+      continue;
+    }
+    var n = t.match(NUM_RE);
+    if(n){
+      var s = splitMarks(n[2]);
+      out.push({ kind:'q', num:parseInt(n[1],10), text:s.text, marks:s.marks, shown:s.shown, line:i+1, raw:raw });
+      continue;
+    }
+    var p = t.match(PART_RE);
+    if(p && p[2]){
+      var sp = splitMarks(p[2]);
+      out.push({ kind:'part', label:p[1], text:sp.text, marks:sp.marks, shown:sp.shown, line:i+1, raw:raw });
+      continue;
+    }
+    var b = t.match(SUB_RE);
+    if(b && b[2]){
+      var s2 = splitMarks(b[2]);
+      out.push({ kind:'sub', label:b[1], text:s2.text, marks:s2.marks, shown:s2.shown, line:i+1, raw:raw });
+      continue;
+    }
+    var s3 = splitMarks(t);
+    out.push({ kind:'plain', text:s3.text, marks:s3.marks, shown:s3.shown, line:i+1, raw:raw });
+  }
+  return out;
+}
+
+/* ------------------------------------------------------------------ preview */
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+/* what is printed against the line: the teacher's own "(3x1=3)" if they wrote it */
+function markText(it){
+  if(it.shown) return esc(it.shown);
+  return it.marks === null ? '' : '(' + it.marks + ')';
+}
+/* runs of underscores are the blanks a child writes on */
+function withBlanks(s){
+  return esc(s).replace(/_{3,}/g, '<span class="blank"></span>');
+}
+
+function render(){
+  var items = parse(el('body').value);
+  var ses = el('session').value.trim(), ttl = el('title').value.trim();
+  var grd = el('grade').value.trim(), sub = el('subject').value.trim();
+  var dur = el('duration').value.trim(), mx = el('max').value.trim();
+  var h = '<div class="frame"></div><div class="page">';
+
+  h += '<div class="head"><img src="ppis-logo.png" alt="PP International School">';
+  if(ses) h += '<div class="tl">' + w('session') + ' ' + esc(ses) + '</div>';
+  if(ttl) h += '<div class="tl">' + esc(ttl) + '</div>';
+  if(grd) h += '<div class="tl">' + w('grade') + ' ' + esc(grd) + '</div>';
+  if(sub) h += '<div class="tl">' + w('subject') + ': ' + esc(sub) + '</div>';
+  h += '</div>';
+
+  h += '<div class="durline"><div>' + (dur ? w('duration') + ': ' + esc(dur) : '') + '</div>' +
+       '<div>' + (mx ? w('max') + ': ' + esc(mx) : '') + '</div></div>';
+
+  var ins = el('instr').value.split(/\r?\n/).filter(function(x){ return x.trim(); });
+  if(ins.length){
+    h += '<div class="gi"><b>' + w('instr') + ':</b>';
+    ins.forEach(function(x, i){ h += '<div>' + (i+1) + '. ' + esc(x.trim()) + '</div>'; });
+    h += '</div>';
+  }
+
+  if(el('showNames').checked)
+    h += '<div class="nmline"><div>' + w('name') + ': <span class="u"></span></div>' +
+         '<div>' + w('section') + ': <span class="u s"></span></div></div>';
+  h += '<hr class="rule">';
+
+  var qpre = w('q');
+  items.forEach(function(it){
+    var m = markText(it);
+    if(it.kind === 'blank'){ h += '<div style="height:2.5mm"></div>'; return; }
+    if(it.kind === 'section'){ h += '<div class="sec">' + esc(it.text) + '</div>'; return; }
+    if(it.kind === 'lines'){
+      for(var i = 0; i < it.n; i++) h += '<div class="ansline"></div>';
+      return;
+    }
+    if(it.kind === 'box'){
+      h += '<table class="box">';
+      it.cells.forEach(function(c){ h += '<tr><td>' + esc(c) + '</td></tr>'; });
+      h += '</table>';
+      return;
+    }
+    if(it.kind === 'match'){
+      h += '<table class="match"><tr class="h"><td class="lbl"></td><td>' + esc(it.head[0] || '') +
+           '</td><td class="lbl"></td><td>' + esc(it.head[1] || '') + '</td></tr>';
+      var letters = hindi() ? ['क','ख','ग','घ','ङ','च','छ','ज'] : 'abcdefgh'.split('');
+      var romans = ['i','ii','iii','iv','v','vi','vii','viii'];
+      it.rows.forEach(function(r, i){
+        h += '<tr><td class="lbl">' + letters[i] + '.</td><td>' + esc(r[0] || '') +
+             '</td><td class="lbl">' + romans[i] + '.</td><td>' + esc(r[1] || '') + '</td></tr>';
+      });
+      h += '</table>';
+      return;
+    }
+    if(it.kind === 'opts'){
+      h += '<div class="opts">';
+      it.opts.forEach(function(o){ h += '<span>' + withBlanks(o) + '</span>'; });
+      h += (m ? '<span class="m" style="flex:0">' + m + '</span>' : '') + '</div>';
+      return;
+    }
+    if(it.kind === 'q'){
+      h += '<div class="qline"><div class="n">' + qpre + it.num + '.</div><div class="t">' +
+           withBlanks(it.text) + '</div><div class="m">' + m + '</div></div>';
+      return;
+    }
+    if(it.kind === 'part' || it.kind === 'sub'){
+      h += '<div class="' + (it.kind === 'part' ? 'partline' : 'subline') +
+           (/_{3,}/.test(it.text) ? ' reg' : '') + '"><div class="n">' +
+           esc(it.label) + '.</div><div class="t">' + withBlanks(it.text) +
+           '</div><div class="m">' + m + '</div></div>';
+      return;
+    }
+    h += '<div class="para">' + withBlanks(it.text) + (m ? '<span class="m" style="float:right">' + m + '</span>' : '') + '</div>';
+  });
+
+  h += '</div>';
+  el('sheet').className = 'sheet' + (hindi() ? ' hi' : '');
+  el('sheet').innerHTML = h;
+
+  var qs = items.filter(function(i){ return i.kind === 'q'; });
+  var total = effectiveMarks(items).reduce(function(a,m){ return a + m; }, 0);
+  el('count').textContent = qs.length + ' question' + (qs.length === 1 ? '' : 's') +
+      ' · marks in the paper: ' + (total || 0);
+}
+
+/* ------------------------------------------------------------------ checking */
+/* prototype-free, so that a word like "constructor" is not a dictionary hit */
+function dict(o){ var d = Object.create(null); Object.keys(o).forEach(function(k){ d[k] = o[k]; }); return d; }
+var AMERICAN = dict({
+  color:'colour', colors:'colours', colored:'coloured', colorful:'colourful', favorite:'favourite',
+  favor:'favour', honor:'honour', honored:'honoured', labor:'labour', neighbor:'neighbour',
+  neighbors:'neighbours', behavior:'behaviour', flavor:'flavour', harbor:'harbour', humor:'humour',
+  rumor:'rumour', odor:'odour', vapor:'vapour', center:'centre', centers:'centres', meter:'metre',
+  meters:'metres', liter:'litre', liters:'litres', theater:'theatre', fiber:'fibre',
+  organize:'organise', organized:'organised', organization:'organisation', realize:'realise',
+  realized:'realised', recognize:'recognise', recognized:'recognised', apologize:'apologise',
+  apologized:'apologised', memorize:'memorise', summarize:'summarise', analyze:'analyse',
+  analyzed:'analysed', analyzing:'analysing', emphasize:'emphasise', criticize:'criticise',
+  civilization:'civilisation', jewelry:'jewellery', plow:'plough', catalog:'catalogue',
+  dialog:'dialogue', defense:'defence', offense:'offence',
+  traveled:'travelled', traveling:'travelling', canceled:'cancelled', modeling:'modelling',
+  fulfill:'fulfil', enroll:'enrol', skillful:'skilful', willful:'wilful', marvelous:'marvellous',
+  aluminum:'aluminium', practicing:'practising'
+});
+/* correct English in their own right, so only ever mentioned, never changed */
+var AMBIGUOUS = dict({
+  check:'cheque', program:'programme', tire:'tyre', tires:'tyres', license:'licence',
+  judgment:'judgement', mold:'mould', practice:'practise', gray:'grey'
+});
+var TYPOS = dict({
+  teh:'the', recieve:'receive', recieved:'received', seperate:'separate', seperately:'separately',
+  occured:'occurred', occuring:'occurring', definately:'definitely', wich:'which', alot:'a lot',
+  becuase:'because', thier:'their', adress:'address', calender:'calendar', grammer:'grammar',
+  tommorow:'tomorrow', untill:'until', sucess:'success', begining:'beginning', neccessary:'necessary',
+  necesary:'necessary', enviroment:'environment', goverment:'government', truely:'truly',
+  arguement:'argument', publically:'publicly', accomodate:'accommodate',
+  embarass:'embarrass', existance:'existence', independant:'independent', maintainance:'maintenance',
+  occassion:'occasion', posession:'possession', priviledge:'privilege', reccommend:'recommend',
+  refered:'referred', rythm:'rhythm', suprise:'surprise', writting:'writing', wether:'whether',
+  quiz2:'quiz', teacherss:'teachers', childrens:'children', furnitures:'furniture',
+  informations:'information', advices:'advice', equipments:'equipment', homeworks:'homework',
+  discuss_about:'discuss', cousin_brother:'cousin'
+});
+
+/* only Latin words, because the dictionaries that use this list are English */
+function words(text){ return text.match(/[A-Za-z][A-Za-z'’-]*/g) || []; }
+/* how long a line is, in any script */
+function wordCount(text){ return (text.match(/[^\s]+/g) || []).length; }
+
+/* a space before punctuation is only wrong after a word, a digit or a closing
+   mark — "2 + 3 = ?" and "____ ?" are how sums and blanks are written */
+var BEFORE_PUNCT = /[A-Za-z0-9)\]'’”"]\s+[.,;:?!]/;
+
+function check(){
+  var src = el('body').value;
+  var items = parse(src);
+  var issues = [];
+  function add(sev, line, what, fixable){
+    issues.push({ sev:sev, line:line, what:what, fixable:!!fixable });
+  }
+
+  if(!src.trim()){
+    add('err', null, 'There are no questions yet — type or paste the paper in box 2.', false);
+    return report(issues, items);
+  }
+
+  /* --- line-level mechanical checks --- */
+  items.forEach(function(it, idx){
+    if(it.kind === 'blank') return;
+    var t = it.raw;
+    var answerFollows = ['opts','box','match','lines'].indexOf(nextKind(items, idx)) > -1;
+
+    if(BEFORE_PUNCT.test(t))           add('err', it.line, 'Space before punctuation — "' + snip(t, BEFORE_PUNCT) + '"', true);
+    if(/[.,;:?!][A-Za-z]/.test(t))     add('err', it.line, 'Missing space after punctuation — "' + snip(t, /[.,;:?!][A-Za-z]/) + '"', true);
+    /* on an option row the wide gaps are the column spacing, not a mistake */
+    if(it.kind !== 'opts' && /\S {2,}\S/.test(t))
+                                       add('err', it.line, 'Two or more spaces in a row', true);
+    if(/['"]/.test(t))                 add('warn', it.line, 'Straight quotes / apostrophes — the rest of a printed paper should use curly ones', true);
+    if(/\s+$/.test(it.raw))            add('warn', it.line, 'Trailing space at the end of the line', true);
+
+    if(it.kind === 'q' || it.kind === 'sub' || it.kind === 'part'){
+      var body = it.text;
+      if(body && !hindi() && /^[a-z]/.test(body) && !isWordItem(body))
+                                        add('err', it.line, 'Question starts with a small letter — "' + body.slice(0,28) + '…"', true);
+      var exercise = /punctuat|capital letter/i.test(body) || (/\(a\)/i.test(body) && /\(b\)/i.test(body));
+      if(body && !exercise && !answerFollows && !isWordItem(body) &&
+         !/[.?!:;।]$/.test(body) && !/[-–—_)]$/.test(body))
+                                        add('warn', it.line, 'No full stop or question mark at the end — "…' + body.slice(-26) + '"', false);
+      if(body && !hindi() && looksLikeQuestion(body) && /\.$/.test(body))
+                                        add('warn', it.line, 'Reads like a question but ends with a full stop — should it be a question mark?', false);
+      if(body && wordCount(body) > 45)
+                                        add('warn', it.line, 'Very long question (' + wordCount(body) + ' words) — consider splitting it', false);
+      /* the blanks of a "fill in the blanks" question are usually on the lines under it */
+      if(/\bfill in the blank/i.test(body) && !hasBlankBelow(items, idx))
+                                        add('warn', it.line, '"Fill in the blank" but there is no blank (____) anywhere in the question', false);
+    }
+
+    var spellQ = isSpellingLine(t);
+    var ws = hindi() ? [] : words(t);   /* the dictionaries are English */
+    ws.forEach(function(w){
+      var low = w.toLowerCase();
+      if(TYPOS[low])
+        add(spellQ ? 'warn' : 'err', it.line, 'Misspelling: "' + w + '" → "' + TYPOS[low] + '"' +
+            (spellQ ? ' — left alone, this line looks like a spelling question' : ''), !spellQ);
+      else if(el('british').checked && AMERICAN[low])
+        add('warn', it.line, 'American spelling: "' + w + '" → "' + AMERICAN[low] + '"' +
+            (spellQ ? ' — left alone, this line looks like a spelling question' : ''), !spellQ);
+      else if(el('british').checked && AMBIGUOUS[low])
+        add('warn', it.line, '"' + w + '" is correct English and is left as typed — but if you mean the ' +
+            'other sense, it is "' + AMBIGUOUS[low] + '"', false);
+    });
+
+    /* MCQ options */
+    if(/\(a\)/i.test(t) && /\(b\)/i.test(t)){
+      var opts = (t.match(/\([a-d]\)/gi) || []).length;
+      if(opts !== 4)                    add('warn', it.line, 'Multiple-choice question with ' + opts + ' options instead of 4', false);
+    }
+  });
+
+  /* --- numbering --- */
+  var qs = items.filter(function(i){ return i.kind === 'q'; });
+  var seen = {};
+  var expect = null;
+  qs.forEach(function(q){
+    if(seen[q.num] !== undefined) add('err', q.line, 'Question number ' + q.num + ' is used twice (also on line ' + seen[q.num] + ')', false);
+    else seen[q.num] = q.line;
+    if(expect !== null && q.num !== expect)
+      add('err', q.line, 'Numbering jumps: ' + (q.num > expect ? 'question ' + expect + ' is missing' : 'goes back to ' + q.num) + ' (found ' + q.num + ', expected ' + expect + ')', false);
+    expect = q.num + 1;
+  });
+  if(qs.length){
+    var pre = new RegExp('^(?:Q|\u092a\u094d\u0930)', 'i');
+    var qStyle = qs.filter(function(q){ return pre.test(q.raw.trim()); }).length;
+    if(qStyle && qStyle !== qs.length)
+      add('warn', null, 'Question numbers are written both as "' + w('q') + '1." and "1." — pick one style', false);
+  }
+
+  /* --- marks --- */
+  var withM = qs.filter(function(q){ return q.marks !== null; });
+  var without = qs.filter(function(q){ return q.marks === null && !partsCarryMarks(items, q); });
+  if(qs.length && without.length && withM.length)
+    add('err', without[0].line, without.length + ' question' + (without.length === 1 ? ' has' : 's have') +
+        ' no marks in brackets (first one on line ' + without[0].line + ')', false);
+  var eff = effectiveMarks(items);
+  var total = eff.reduce(function(a,m){ return a + m; }, 0);
+  qs.forEach(function(q){
+    var p = partsMarks(items, q);
+    if(q.marks !== null && p.any && Math.abs(p.sum - q.marks) > 0.001)
+      add('warn', q.line, 'Question ' + q.num + ' is marked ' + q.marks +
+          ' but its parts add up to ' + p.sum + ' — only the ' + q.marks + ' is counted in the total', false);
+  });
+  var mx = parseFloat(el('max').value);
+  if(!isNaN(mx) && total){
+    if(Math.abs(total - mx) > 0.001)
+      add('err', null, 'Marks do not add up: the questions total ' + total + ' but "Maximum marks" says ' + mx, false);
+  }
+  /* section-wise totals stated in a heading */
+  items.filter(function(i){ return i.kind === 'section'; }).forEach(function(s, idx, arr){
+    var m = s.text.match(/(\d+)\s*marks/i);
+    if(!m) return;
+    var stated = parseFloat(m[1]);
+    var from = items.indexOf(s), to = items.length;
+    for(var j = from + 1; j < items.length; j++){ if(items[j].kind === 'section'){ to = j; break; } }
+    var got = 0;
+    for(var k = from + 1; k < to; k++) got += eff[k];
+    if(got && Math.abs(got - stated) > 0.001)
+      add('err', s.line, '"' + s.text.slice(0,42) + '" says ' + stated + ' marks but its questions total ' + got, false);
+  });
+
+  /* --- repeated questions --- */
+  var norm = {};
+  qs.concat(items.filter(function(i){ return i.kind === 'sub'; })).forEach(function(q){
+    if(!q.text) return;
+    /* letters of any script, so that two identical Hindi questions still match */
+    var k = q.text.toLowerCase().replace(/[^\p{L}\p{N} ]/gu,'').replace(/\s+/g,' ').trim();
+    if(k.length < 12) return;
+    if(norm[k] !== undefined) add('err', q.line, 'Same question appears twice (also on line ' + norm[k] + ')', false);
+    else norm[k] = q.line;
+  });
+
+  /* --- paper-level --- */
+  if(!qs.length) add('warn', null, 'No numbered questions found — start each question with "1." or "' + w('q') + '1."', false);
+  if(!el('grade').value.trim())    add('warn', null, 'Grade is empty in the paper details', false);
+  if(!el('subject').value.trim())  add('warn', null, 'Subject is empty in the paper details', false);
+  if(!el('max').value.trim())      add('warn', null, 'Maximum marks is empty in the paper details', false);
+  if(!el('duration').value.trim()) add('warn', null, 'Duration is empty in the paper details', false);
+
+  report(issues, items);
+}
+
+/* everything belonging to a question: its A./a./option lines, its passage,
+   its help box — up to the next question or section heading */
+function partRange(items, q){
+  var i = items.indexOf(q), to = items.length;
+  for(var j = i + 1; j < items.length; j++){
+    if(items[j].kind === 'q' || items[j].kind === 'section'){ to = j; break; }
+  }
+  return { from:i + 1, to:to };
+}
+
+/* the marks written on a question's own parts */
+function partsMarks(items, q){
+  var r = partRange(items, q), any = false, sum = 0;
+  for(var j = r.from; j < r.to; j++){
+    if(items[j].marks !== null && items[j].marks !== undefined){ any = true; sum += items[j].marks; }
+  }
+  return { any:any, sum:sum };
+}
+function partsCarryMarks(items, q){ return partsMarks(items, q).any; }
+
+/* what each line adds to the total: a question marked (6) whose parts split
+   that 6 must not be counted twice, so its parts then count as nothing */
+function effectiveMarks(items){
+  var eff = items.map(function(i){ return i.marks || 0; });
+  items.forEach(function(it, i){
+    if(it.kind !== 'q' || it.marks === null) return;
+    var r = partRange(items, it);
+    for(var j = r.from; j < r.to; j++) eff[j] = 0;
+  });
+  return eff;
+}
+
+function nextKind(items, idx){
+  for(var j = idx + 1; j < items.length; j++){
+    if(items[j].kind !== 'blank') return items[j].kind;
+  }
+  return null;
+}
+
+/* "a. lawn -", "b. Plural of ‘mouse’": a word being asked about, not a sentence */
+function isWordItem(body){
+  return wordCount(body) <= 4 || /['‘’"“”]\s*$/.test(body);
+}
+
+function hasBlankBelow(items, idx){
+  if(/_/.test(items[idx].raw)) return true;
+  for(var j = idx + 1; j < items.length; j++){
+    if(items[j].kind === 'q' || items[j].kind === 'section') break;
+    if(/_/.test(items[j].raw)) return true;
+  }
+  return false;
+}
+
+/* wh-questions always; an auxiliary only when a subject follows it, so that an
+   instruction like "Do as directed." is not mistaken for a question */
+function looksLikeQuestion(body){
+  if(/^(what|why|how|when|where|who|whose|which)\b/i.test(body)) return true;
+  return /^(do|does|did|is|are|was|were|can|could|will|would|has|have|had)\s+(i|you|he|she|it|we|they|the|this|that|these|those|any|your|his|her|their|there)\b/i.test(body);
+}
+
+/* "Choose the correct spelling" style lines hold deliberate misspellings */
+function isSpellingLine(t){
+  return /\bspell(ing|ings|ed)?\b/i.test(t) || /\bcorrectly spelt\b/i.test(t);
+}
+
+function snip(t, re){
+  var m = t.match(re);
+  if(!m) return t.slice(0,24);
+  var i = Math.max(0, m.index - 12);
+  return (i ? '…' : '') + t.slice(i, m.index + 14).trim() + '…';
+}
+
+function report(issues, items){
+  var errs = issues.filter(function(i){ return i.sev === 'err'; }).length;
+  var warns = issues.length - errs;
+  var h = '';
+  if(!issues.length){
+    h = '<div class="ok">No errors found. ' +
+        items.filter(function(i){ return i.kind === 'q'; }).length + ' questions checked.</div>';
+  } else {
+    h = '<p class="count"><b>' + errs + '</b> to fix · <b>' + warns + '</b> to look at</p><div class="issues">';
+    issues.sort(function(a,b){ return (a.sev === b.sev ? (a.line || 0) - (b.line || 0) : (a.sev === 'err' ? -1 : 1)); });
+    issues.forEach(function(i){
+      h += '<div class="iss ' + i.sev + '">' + (i.fixable ? '<span class="fixable">auto-fixable</span>' : '') +
+           '<span class="where">' + (i.line ? 'Line ' + i.line : 'Paper') + '</span> ' + esc(i.what) + '</div>';
+    });
+    h += '</div>';
+  }
+  el('report').innerHTML = h;
+}
+
+/* ------------------------------------------------------------------ auto-fix */
+function autofix(){
+  var lines = el('body').value.split(/\r?\n/).map(function(line){
+    var t = line;
+    var keepWords = isSpellingLine(t);
+    var optionRow = isOptionRow(t.trim());
+    t = t.replace(/[ \t]+$/, '');
+    t = t.replace(/([A-Za-z0-9)\]'’”"])\s+([.,;:?!])/g, '$1$2');
+    t = t.replace(/([.,;:?!])([A-Za-z])/g, '$1 $2');
+    if(!optionRow) t = t.replace(/(\S) {2,}(?=\S)/g, '$1 ');   /* option columns keep their gaps */
+    t = t.replace(/\b([A-Za-z]+)'([A-Za-z])/g, '$1\u2019$2');
+    t = t.replace(/"([^"]*)"/g, '\u201C$1\u201D');
+    t = t.replace(/'([^']*)'/g, '\u2018$1\u2019');   /* a quoted word keeps a proper opening quote */
+    t = t.replace(/'/g, '\u2019');
+    /* misspellings + American spellings, keeping the original capitalisation */
+    if(!keepWords && !hindi()) t = t.replace(/[A-Za-z][A-Za-z'’-]*/g, function(w){
+      var low = w.toLowerCase();
+      var to = TYPOS[low] || (el('british').checked ? AMERICAN[low] : null);   /* AMBIGUOUS words are never rewritten */
+      if(!to) return w;
+      if(w[0] === w[0].toUpperCase()) return to[0].toUpperCase() + to.slice(1);
+      return to;
+    });
+    /* capitalise the first letter of a question or part */
+    var m = hindi() ? null : (t.match(NUM_RE) || t.match(PART_RE) || t.match(SUB_RE));
+    if(m && m[2] && /^[a-z]/.test(m[2]) && !isWordItem(m[2]) && !optionRow){
+      var at = t.indexOf(m[2]);
+      t = t.slice(0, at) + m[2][0].toUpperCase() + t.slice(at + 1);
+    }
+    return t;
+  });
+  el('body').value = lines.join('\n');
+  save(); render(); check();
+}
+
+/* ------------------------------------------------------------------ samples */
+var SAMPLE = [
+  'SECTION - A (READING)',
+  'Q1. Read the passage carefully.',
+  'Rohan was playing with Vinay in the Nehru Park, when he found a wallet on the ground. He opened it and saw some money and an ID card. Rohan thought for a moment and decided to do the right thing. He took the wallet to a police officer who was standing nearby. The officer found the owner and returned it. The man thanked Rohan for his honesty. Rohan felt happy because he did the right thing.',
+  'A. Choose the correct answer. (3x1=3)',
+  'a. Where was Rohan playing?',
+  'i. At home  ii. In the park  iii. In school  iv. In the market',
+  'b. What was inside the wallet?',
+  'i. Food  ii. Clothes  iii. Money and an ID card  iv. A pencil',
+  'c. What did Rohan do with the wallet?',
+  'i. Kept it  ii. Threw it away  iii. Gave it to a police officer  iv. Hid it',
+  'B. Find the masculine form of the word ‘woman’ from the passage. ____ (1)',
+  '',
+  'SECTION – B (WRITING)',
+  'Q2. Look at the picture and fill in the blanks using the help box given below. (5)',
+  'BOX: baskets | shopkeeper | customers | money | crowded',
+  'a. The market is very ____ .',
+  'b. The ____ sells fresh food to the people.',
+  'c. Several ____ are buying things from different shops.',
+  'd. Some people are carrying ____ filled with goods.',
+  'e. People give ____ to buy what they need.',
+  '',
+  'SECTION – C (GRAMMAR)',
+  'Q3. Choose the correct singular or plural form as asked. (2x1=2)',
+  'a. Singular of ‘teeth’',
+  'i. tooth  ii. tooths  iii. teeth',
+  'b. Plural of ‘mouse’',
+  'i. mouses  ii. mice  iii. mouse',
+  'Q4. Match the following masculine and feminine gender words. (4x0.5=2)',
+  'MATCH: MASCULINE | FEMININE',
+  'uncle | niece',
+  'gander | wife',
+  'husband | aunt',
+  'nephew | goose',
+  'Q5. Read the sentences and choose the correct adjective. (2x0.5=1)',
+  'a. It is a cold day today.',
+  'i. cold  ii. day  iii. today',
+  'b. Grandpa bought some juicy mangoes.',
+  'i. grandpa  ii. juicy  iii. mangoes',
+  '',
+  'SECTION - D (LITERATURE)',
+  'Q6. Put a tick on the correct meaning of the given words. (1)',
+  'a. lawn -',
+  'i. garden area  ii. ceiling',
+  'Q7. Frame a sentence using the word ‘landed’. (1)',
+  'LINES: 1',
+  'Q8. Write True or False. (2x1=2)',
+  'a. The child ate crumbs on Sunday. ____',
+  'b. It took three days to make the ginger bread house. ____',
+  'Q9. Answer the following question.',
+  'a. How did the little boy lose his mitten? (1x2=2)',
+  'LINES: 4'
+].join('\n');
+
+var SAMPLE_HI = [
+  'खंड - क (अपठित गद्यांश)',
+  'प्र1. निम्नलिखित गद्यांश ध्यान से पढ़िए।',
+  'रोहन नेहरू पार्क में विनय के साथ खेल रहा था। तभी उसे ज़मीन पर एक पर्स मिला। उसने पर्स खोला और उसमें कुछ रुपये तथा एक पहचान पत्र देखा। रोहन ने कुछ देर सोचा और पास खड़े पुलिस अधिकारी को पर्स दे दिया। अधिकारी ने मालिक को ढूँढकर पर्स लौटा दिया। सच्चाई का मार्ग चुनने पर रोहन को बहुत खुशी हुई।',
+  'क. रोहन कहाँ खेल रहा था? (1)',
+  'i. घर में  ii. पार्क में  iii. विद्यालय में  iv. बाज़ार में',
+  'ख. पर्स में क्या था? (1)',
+  'i. भोजन  ii. कपड़े  iii. रुपये और पहचान पत्र  iv. पेंसिल',
+  'ग. रोहन ने पर्स का क्या किया? (1)',
+  'i. रख लिया  ii. फेंक दिया  iii. पुलिस अधिकारी को दे दिया  iv. छिपा दिया',
+  'घ. गद्यांश में से ‘स्त्री’ शब्द का पुल्लिंग लिखिए। ____ (1)',
+  '',
+  'खंड - ख (लेखन)',
+  'प्र2. सहायता-बॉक्स की सहायता से रिक्त स्थान भरिए। (5)',
+  'BOX: टोकरियाँ | दुकानदार | ग्राहक | रुपये | भीड़',
+  'क. बाज़ार में बहुत ____ थी।',
+  'ख. ____ लोगों को ताज़ी सब्ज़ियाँ बेचता है।',
+  'ग. कई ____ अलग-अलग दुकानों से सामान खरीद रहे थे।',
+  'घ. कुछ लोग सामान से भरी ____ लिए जा रहे थे।',
+  'ङ. लोग अपनी ज़रूरत का सामान लेने के लिए ____ देते हैं।',
+  '',
+  'खंड - ग (व्याकरण)',
+  'प्र3. वचन बदलिए। (2x1=2)',
+  'क. पुस्तक',
+  'i. पुस्तकें  ii. पुस्तकों  iii. पुस्तकाँ',
+  'ख. लड़का',
+  'i. लड़कियाँ  ii. लड़के  iii. लड़कों',
+  'प्र4. सही मिलान करिए। (4x0.5=2)',
+  'MATCH: शब्द | अर्थ',
+  'विद्यालय | पढ़ने का स्थान',
+  'सरोवर | तालाब',
+  'नीर | जल',
+  'गगन | आकाश',
+  '',
+  'खंड - घ (साहित्य)',
+  'प्र5. ‘उड़ान’ शब्द से वाक्य बनाइए। (1)',
+  'LINES: 2',
+  'प्र6. सही या गलत लिखिए। (2x1=2)',
+  'क. बच्चे ने रविवार को टुकड़े खाए। ____',
+  'ख. घर बनाने में तीन दिन लगे। ____',
+  'प्र7. निम्नलिखित प्रश्न का उत्तर लिखिए।',
+  'क. बालक का दस्ताना कैसे खो गया? (1x4=4)',
+  'LINES: 4'
+].join('\n');
+
+function sampleForLanguage(){ return hindi() ? SAMPLE_HI : SAMPLE; }
+
+/* ------------------------------------------------------------------ wire up */
+/* the English spelling dictionaries mean nothing in a Hindi paper */
+function languageChanged(){
+  el('britishRow').style.display = hindi() ? 'none' : 'flex';
+  save(); render();
+}
+FIELDS.forEach(function(f){ el(f).addEventListener('input', function(){ save(); render(); }); });
+CHECKS.forEach(function(f){ el(f).addEventListener('change', function(){ save(); render(); }); });
+el('lang').addEventListener('change', languageChanged);
+el('check').addEventListener('click', check);
+el('fix').addEventListener('click', autofix);
+el('print').addEventListener('click', function(){ window.print(); });
+el('sample').addEventListener('click', function(){
+  el('body').value = sampleForLanguage();
+  if(hindi()){
+    el('subject').value = 'हिंदी';
+    el('instr').value = 'कार्यपत्रक ध्यान से पढ़िए।\nउत्तर दिए गए स्थान पर लिखिए।';
+  } else {
+    el('subject').value = 'ENGLISH';
+    el('instr').value = 'Read the worksheet carefully.\nWrite the answers in the space provided.';
+  }
+  el('grade').value = 'II';
+  el('title').value = hindi() ? 'अभ्यास कार्यपत्रक-2' : 'APPRAISAL WORKSHEET-2';
+  el('duration').value = hindi() ? '40 मिनट' : '40 Minutes';
+  el('max').value = '20';
+  save(); render(); check();
+});
+el('clear').addEventListener('click', function(){
+  if(!confirm('Clear the questions? The paper details stay as they are.')) return;
+  el('body').value = ''; save(); render(); el('report').innerHTML = '';
+});
+
+if(!load()) el('body').value = SAMPLE;   /* a cleared paper stays cleared */
+languageChanged();
+</script>
+</body>
+</html>
